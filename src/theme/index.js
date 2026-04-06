@@ -1,0 +1,42 @@
+export const Colors = {
+  dark: {
+    background: '#09090B',
+    surface: '#18181B',
+    surfaceLighter: '#27272A',
+    text: '#FFFFFF',
+    textSecondary: '#A1A1AA',
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    accent: '#EC4899',
+    success: '#10B981',
+    danger: '#EF4444',
+    warning: '#F59E0B',
+    divider: '#27272A',
+  },
+  light: {
+    background: '#FAFAFA',
+    surface: '#FFFFFF',
+    surfaceLighter: '#F4F4F5',
+    text: '#09090B',
+    textSecondary: '#71717A',
+    primary: '#4F46E5',
+    secondary: '#7C3AED',
+    accent: '#DB2777',
+    success: '#059669',
+    danger: '#DC2626',
+    warning: '#D97706',
+    divider: '#E4E4E7',
+  },
+};
+
+export const Gradients = {
+  primary: ['#6366F1', '#8B5CF6'],
+  accent: ['#EC4899', '#8B5CF6'],
+  success: ['#10B981', '#34D399'],
+  danger: ['#EF4444', '#F87171'],
+  surface: ['#18181B', '#27272A'],
+  cardBlue: ['#4F46E5', '#3B82F6'],
+  cardGreen: ['#10B981', '#059669'],
+  cardPurple: ['#8B5CF6', '#7C3AED'],
+  cardDark: ['#09090B', '#18181B'],
+};
