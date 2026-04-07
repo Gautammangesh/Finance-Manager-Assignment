@@ -1,43 +1,65 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { Colors } from '@/src/theme';
 import { useColorScheme } from '@/components/useColorScheme';
 import { TrendingUp, TrendingDown } from 'lucide-react-native';
+import { MotiView } from 'moti';
 
-export const SummaryCard = ({ type, amount }) => {
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export const SummaryCard = ({ type, amount, subtitle, index = 0 }) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
+  const isDark = colorScheme === 'dark';
   const isIncome = type === 'income';
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }]}>
-      <View style={[styles.iconWrapper, { backgroundColor: isIncome ? theme.success + '20' : theme.danger + '20' }]}>
+    <MotiView
+      from={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'timing', duration: 400, delay: index * 100 }}
+      style={[
+        styles.container, 
+        { 
+          backgroundColor: isDark ? theme.surface : '#FFFFFF',
+          borderWidth: isDark ? 0 : 1,
+          borderColor: theme.divider,
+        }
+      ]}
+    >
+      <View style={[
+        styles.iconWrapper, 
+        { backgroundColor: isIncome ? theme.success + '20' : theme.danger + '20' }
+      ]}>
         {isIncome ? (
-          <TrendingUp color={theme.success} size={20} />
+          <TrendingDown color={theme.success} size={18} />
         ) : (
-          <TrendingDown color={theme.danger} size={20} />
+          <TrendingUp color={theme.danger} size={18} />
         )}
       </View>
-      <View style={styles.content}>
-        <Text style={[styles.label, { color: theme.textSecondary }]}>
-          {isIncome ? 'Total Income' : 'Total Expense'}
+      <Text style={[styles.label, { color: theme.textSecondary }]}>
+        {isIncome ? 'INCOME' : 'EXPENSE'}
+      </Text>
+      <Text style={[styles.amount, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
+        ${amount.toLocaleString()}
+      </Text>
+      {subtitle && (
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+          {subtitle}
         </Text>
-        <Text style={[styles.amount, { color: theme.text }]}>
-          ${amount.toLocaleString()}
-        </Text>
-      </View>
-    </View>
+      )}
+    </MotiView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 16,
     borderRadius: 20,
     marginHorizontal: 6,
+    minWidth: (SCREEN_WIDTH - 72) / 2,
+    maxWidth: (SCREEN_WIDTH - 48) / 2,
   },
   iconWrapper: {
     width: 40,
@@ -45,18 +67,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
-  },
-  content: {
-    flex: 1,
+    marginBottom: 12,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
     marginBottom: 4,
+    letterSpacing: 0.5,
   },
   amount: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 11,
+    fontWeight: '400',
+    marginTop: 4,
   },
 });

@@ -1,11 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Text, Platform } from 'react-native';
+import { StyleSheet, View, Text, Platform, Image, Dimensions } from 'react-native';
 import { Colors, Gradients } from '@/src/theme';
 import { useColorScheme } from '@/components/useColorScheme';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Wifi } from 'lucide-react-native';
+import { RefreshCw } from 'lucide-react-native';
 
-export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0329', variant = 'blue' }) => {
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0329', variant = 'teal' }) => {
   const colorScheme = useColorScheme();
   
   const getGradients = () => {
@@ -13,12 +15,19 @@ export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0
       case 'purple': return Gradients.cardPurple;
       case 'green': return Gradients.cardGreen;
       case 'dark': return Gradients.cardDark;
-      default: return Gradients.cardBlue;
+      case 'blue': return Gradients.cardBlue;
+      case 'mint': return Gradients.cardMint;
+      case 'teal': 
+      default: return Gradients.cardTeal;
     }
   };
 
+  // Card width responsive to screen
+  const cardWidth = Math.min(SCREEN_WIDTH - 48, 400);
+  const cardHeight = cardWidth * 0.55;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width: cardWidth, height: cardHeight }]}>
       <LinearGradient
         colors={getGradients()}
         start={{ x: 0, y: 0 }}
@@ -26,21 +35,27 @@ export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0
         style={styles.gradient}
       >
         <View style={styles.header}>
-          <Text style={styles.bankName}>ADRBank</Text>
-          <Wifi color="rgba(255,255,255,0.6)" size={24} style={styles.nfcIcon} />
+          <Image 
+            source={require('@/assets/images/tuf-logo.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <View style={styles.refreshButton}>
+            <RefreshCw color="rgba(255,255,255,0.8)" size={20} />
+          </View>
         </View>
-
-        <Text style={styles.balance}>${balance.toLocaleString()}</Text>
 
         <Text style={styles.cardNumber}>{cardNumber}</Text>
 
+        <Text style={styles.balance}>${balance.toLocaleString()}</Text>
+
         <View style={styles.footer}>
           <View>
-            <Text style={styles.label}>Card Holder Name</Text>
+            <Text style={styles.label}>CARD HOLDER NAME</Text>
             <Text style={styles.value}>{name.toUpperCase()}</Text>
           </View>
           <View style={styles.rightFooter}>
-            <Text style={styles.label}>Expired Date</Text>
+            <Text style={styles.label}>EXPIRED DATE</Text>
             <Text style={styles.value}>10/28</Text>
           </View>
         </View>
@@ -51,25 +66,24 @@ export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0
 
 const styles = StyleSheet.create({
   container: {
-    height: 200,
-    width: '100%',
     borderRadius: 24,
     overflow: 'hidden',
+    alignSelf: 'center',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 10,
+        shadowOpacity: 0.2,
+        shadowRadius: 15,
       },
       android: {
-        elevation: 10,
+        elevation: 12,
       },
     }),
   },
   gradient: {
     flex: 1,
-    padding: 24,
+    padding: 20,
     justifyContent: 'space-between',
   },
   header: {
@@ -77,27 +91,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  bankName: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
-  nfcIcon: {
-    transform: [{ rotate: '90deg' }],
-  },
-  balance: {
-    color: '#FFF',
-    fontSize: 32,
-    fontWeight: '700',
-    marginTop: 8,
+  refreshButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardNumber: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
     letterSpacing: 2,
-    marginTop: 16,
+    marginTop: 8,
+  },
+  balance: {
+    color: '#FFF',
+    fontSize: 28,
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',
@@ -108,11 +125,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   label: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 10,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 9,
     fontWeight: '500',
     marginBottom: 4,
-    textTransform: 'uppercase',
   },
   value: {
     color: '#FFF',

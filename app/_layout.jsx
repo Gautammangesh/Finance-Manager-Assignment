@@ -6,11 +6,14 @@ import { useFonts } from 'expo-font';
 import { Stack, ErrorBoundary } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StyleSheet } from 'react-native';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { Colors } from '@/src/theme';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
@@ -23,7 +26,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -43,16 +45,79 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const theme = Colors[colorScheme ?? 'dark'];
+
+  // Custom themes with proper colors
+  const customDarkTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: theme.background,
+      card: theme.surface,
+      text: '#FFFFFF',
+      border: theme.divider,
+      primary: theme.primary,
+    },
+  };
+
+  const customLightTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.background,
+      card: '#FFFFFF',
+      text: '#0F172A',
+      border: '#E2E8F0',
+      primary: theme.primary,
+    },
+  };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="add-transaction" options={{ presentation: 'modal', title: 'Add Transaction' }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Info' }} />
-      </Stack>
-    </ThemeProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <ThemeProvider value={isDark ? customDarkTheme : customLightTheme}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: isDark ? theme.background : '#FFFFFF',
+            },
+            headerTintColor: isDark ? '#FFFFFF' : '#0F172A',
+            headerShadowVisible: false,
+            contentStyle: {
+              backgroundColor: theme.background,
+            },
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen 
+            name="add-transaction" 
+            options={{ 
+              presentation: 'modal', 
+              title: 'Add Transaction',
+              headerStyle: {
+                backgroundColor: isDark ? theme.background : '#FFFFFF',
+              },
+              headerTintColor: isDark ? '#FFFFFF' : '#0F172A',
+            }} 
+          />
+          <Stack.Screen 
+            name="modal" 
+            options={{ 
+              presentation: 'modal', 
+              title: 'Info' 
+            }} 
+          />
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export { ErrorBoundary };

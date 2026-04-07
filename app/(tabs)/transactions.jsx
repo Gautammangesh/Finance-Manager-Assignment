@@ -1,29 +1,44 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, Platform, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Platform, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/src/theme';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useFinanceStore } from '@/src/store/useFinanceStore';
 import { TransactionItem } from '@/src/components/TransactionItem';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
+import { SummaryCard } from '@/src/components/SummaryCard';
+import { AnimatedPieChart } from '@/src/components/AnimatedPieChart';
+import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { BarChart } from "react-native-gifted-charts";
+import { MotiView } from 'moti';
+import { Ghost, TrendingUp, TrendingDown } from 'lucide-react-native';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function TransactionsScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
+  const isDark = colorScheme === 'dark';
   const { transactions, categories, user } = useFinanceStore();
   const [filterIndex, setFilterIndex] = useState(0);
 
-  // Prepare Chart Data
+  // Calculate totals
+  const totalIncome = transactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const totalExpense = transactions
+    .filter((t) => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Prepare Bar Chart Data
   const chartData = useMemo(() => {
     const expensesGrouped = {};
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
-      d.setDate(d.getDate() - i);
+      d.setDate(d.getDate() - (6 - i));
       return d.toISOString().split('T')[0];
-    }).reverse();
+    });
 
     last7Days.forEach(date => expensesGrouped[date] = 0);
 
@@ -36,29 +51,168 @@ export default function TransactionsScreen() {
         }
       });
 
-    return last7Days.map(date => ({
-      value: expensesGrouped[date] || 0,
-      label: new Date(date).toLocaleDateString(undefined, { weekday: 'short' })[0],
-      frontColor: theme.primary,
-      topLabelComponent: () => (
-        <Text style={{ color: theme.textSecondary, fontSize: 10, marginBottom: 4 }}>
-          {expensesGrouped[date] > 0 ? `$${expensesGrouped[date]}` : ''}
-        </Text>
-      ),
-    }));
+    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+    return last7Days.map((date, index) => {
+      const dayIndex = new Date(date).getDay();
+      return {
+        value: expensesGrouped[date] || 0,
+        label: dayLabels[dayIndex],
+        frontColor: '#2DD4BF',
+        topLabelComponent: () => (
+          expensesGrouped[date] > 0 ? (
+            <Text style={{ color: theme.textSecondary, fontSize: 9, marginBottom: 4 }}>
+              ${expensesGrouped[date]}
+            </Text>
+          ) : null
+        ),
+      };
+    });
   }, [transactions, theme]);
+
+  // Prepare Pie Chart Data for category breakdown
+  const pieChartData = useMemo(() => {
+    const categoryTotals = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(t => {
+        const category = categories.find(c => c.id === t.category);
+        if (category) {
+          categoryTotals[category.id] = (categoryTotals[category.id] || 0) + t.amount;
+        }
+      });
+
+    return Object.entries(categoryTotals).map(([catId, value]) => {
+      const category = categories.find(c => c.id === catId);
+      return {
+        name: category?.name || 'Other',
+        value,
+        color: category?.color || '#6366F1',
+      };
+    });
+  }, [transactions, categories]);
+
+  const renderHeader = () => (
+    <>
+      {/* Balance Cards */}
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500 }}
+        style={styles.balanceRow}
+      >
+        <View style={[
+          styles.balanceCard, 
+          { 
+            backgroundColor: isDark ? theme.surface : '#FFFFFF',
+            borderColor: isDark ? 'transparent' : '#E2E8F0',
+          }
+        ]}>
+          <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>AVAILABLE BALANCE</Text>
+          <Text style={[styles.balanceAmount, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
+            ${user.balance.toLocaleString()}
+          </Text>
+        </View>
+        <View style={[
+          styles.balanceCard, 
+          { 
+            backgroundColor: isDark ? theme.surface : '#FFFFFF',
+            borderColor: isDark ? 'transparent' : '#E2E8F0',
+          }
+        ]}>
+          <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>SPENT</Text>
+          <Text style={[styles.balanceAmount, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
+            ${totalExpense.toLocaleString()}
+          </Text>
+        </View>
+      </MotiView>
+
+      {/* Spending Chart */}
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500, delay: 100 }}
+        style={[
+          styles.chartContainer, 
+          { 
+            backgroundColor: isDark ? theme.surface : '#FFFFFF',
+            borderColor: isDark ? 'transparent' : '#E2E8F0',
+          }
+        ]}
+      >
+        <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>WEEKLY SPENDING</Text>
+        <View style={styles.chartWrapper}>
+          <BarChart
+            data={chartData}
+            barWidth={Math.min(28, (SCREEN_WIDTH - 120) / 10)}
+            noOfSections={3}
+            barBorderRadius={6}
+            frontColor="#2DD4BF"
+            yAxisThickness={0}
+            xAxisThickness={0}
+            xAxisLabelTextStyle={{ color: theme.textSecondary, fontSize: 11 }}
+            hideRules
+            hideYAxisText
+            spacing={Math.min(24, (SCREEN_WIDTH - 120) / 12)}
+            isAnimated
+            animationDuration={800}
+            height={140}
+            maxValue={Math.max(...chartData.map(d => d.value), 100)}
+          />
+        </View>
+      </MotiView>
+
+      {/* Section Title */}
+      <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
+        Weekly Transactions
+      </Text>
+    </>
+  );
+
+  const renderEmptyState = () => (
+    <MotiView 
+      from={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 300 }}
+      style={[
+        styles.emptyState, 
+        { 
+          backgroundColor: isDark ? theme.surface : '#FFFFFF',
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#E2E8F0',
+        }
+      ]}
+    >
+      <Ghost color={theme.textSecondary} size={48} style={{ marginBottom: 12, opacity: 0.5 }} />
+      <Text style={{ color: isDark ? '#FFFFFF' : '#0F172A', fontWeight: '600', fontSize: 16 }}>
+        No transactions yet
+      </Text>
+      <Text style={{ color: theme.textSecondary, fontSize: 13, marginTop: 6, textAlign: 'center' }}>
+        Your transaction history will appear here
+      </Text>
+    </MotiView>
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>Wallet History</Text>
-        <View style={styles.tabWrapper}>
-          <SegmentedControl
-            values={['Weekly', 'Monthly', 'Yearly']}
-            selectedIndex={filterIndex}
-            onChange={setFilterIndex}
-          />
+        <View>
+          <Text style={[styles.title, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>Balances</Text>
+          <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+            Manage your cash flow and spending pace
+          </Text>
         </View>
+        <ThemeToggle />
+      </View>
+
+      {/* Filter Tabs */}
+      <View style={styles.tabWrapper}>
+        <SegmentedControl
+          values={['Weekly', 'Monthly', 'Yearly']}
+          selectedIndex={filterIndex}
+          onChange={setFilterIndex}
+        />
       </View>
 
       <FlatList
@@ -66,44 +220,12 @@ export default function TransactionsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <>
-            <View style={styles.balanceSection}>
-              <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>Total Balance</Text>
-              <Text style={[styles.balanceAmount, { color: theme.text }]}>${user.balance.toLocaleString()}</Text>
-            </View>
-
-            {/* Spending Chart */}
-            <View style={[styles.chartContainer, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.chartTitle, { color: theme.textSecondary }]}>Weekly Spending</Text>
-              <BarChart
-                data={chartData}
-                barWidth={22}
-                noOfSections={3}
-                barBorderRadius={6}
-                frontColor={theme.primary}
-                yAxisThickness={0}
-                xAxisThickness={0}
-                hideRules
-                hideYAxisText
-                spacing={20}
-                isAnimated
-                animationDuration={800}
-              />
-            </View>
-
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>All Transactions</Text>
-          </>
-        }
-        renderItem={({ item }) => {
+        ListHeaderComponent={renderHeader}
+        renderItem={({ item, index }) => {
           const category = categories.find((c) => c.id === item.category) || categories[0];
-          return <TransactionItem transaction={item} category={category} />;
+          return <TransactionItem transaction={item} category={category} index={index} />;
         }}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={{ color: theme.textSecondary }}>No transactions found</Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyState}
       />
     </SafeAreaView>
   );
@@ -114,58 +236,77 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
+    paddingTop: Platform.OS === 'android' ? 16 : 10,
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '700',
-    marginBottom: 20,
-  },
-  tabWrapper: {
-    marginBottom: 8,
-  },
-  balanceSection: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  balanceLabel: {
-    fontSize: 14,
-    fontWeight: '500',
     marginBottom: 4,
   },
+  subtitle: {
+    fontSize: 14,
+  },
+  tabWrapper: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  balanceCard: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  balanceLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
   balanceAmount: {
-    fontSize: 36,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontSize: 22,
+    fontWeight: '700',
   },
   chartContainer: {
-    marginHorizontal: 20,
+    marginBottom: 24,
     padding: 20,
-    borderRadius: 24,
-    marginBottom: 32,
-    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 1,
   },
   chartTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-    textTransform: 'uppercase',
+    marginBottom: 20,
+    letterSpacing: 0.5,
+  },
+  chartWrapper: {
+    alignItems: 'center',
+    paddingRight: 10,
   },
   sectionTitle: {
-    paddingHorizontal: 20,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 16,
   },
   listContent: {
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   emptyState: {
-    marginTop: 40,
+    padding: 32,
+    borderRadius: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    marginTop: 20,
   },
 });

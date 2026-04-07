@@ -12,20 +12,30 @@ export const Colors = {
     danger: '#EF4444',
     warning: '#F59E0B',
     divider: '#27272A',
+    // Additional colors for better contrast
+    cardBg: '#1F1F23',
+    inputBg: '#27272A',
+    inputBorder: '#3F3F46',
+    buttonText: '#FFFFFF',
   },
   light: {
-    background: '#FAFAFA',
+    background: '#F8FAFC',
     surface: '#FFFFFF',
-    surfaceLighter: '#F4F4F5',
-    text: '#09090B',
-    textSecondary: '#71717A',
+    surfaceLighter: '#F1F5F9',
+    text: '#0F172A',
+    textSecondary: '#64748B',
     primary: '#4F46E5',
     secondary: '#7C3AED',
     accent: '#DB2777',
     success: '#059669',
     danger: '#DC2626',
     warning: '#D97706',
-    divider: '#E4E4E7',
+    divider: '#E2E8F0',
+    // Additional colors for better contrast
+    cardBg: '#FFFFFF',
+    inputBg: '#F8FAFC',
+    inputBorder: '#CBD5E1',
+    buttonText: '#0F172A',
   },
 };
 
@@ -39,4 +49,7 @@ export const Gradients = {
   cardGreen: ['#10B981', '#059669'],
   cardPurple: ['#8B5CF6', '#7C3AED'],
   cardDark: ['#09090B', '#18181B'],
+  // New gradient for TUF card - teal/mint gradient like in image
+  cardTeal: ['#2DD4BF', '#5EEAD4'],
+  cardMint: ['#06B6D4', '#2DD4BF'],
 };
