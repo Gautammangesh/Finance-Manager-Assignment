@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RefreshCcw, Search, Bell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -78,14 +78,23 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <LinearGradient
-        colors={colorScheme === 'dark' ? Gradients.cardAurora : ['#FFFFFF', '#F3F4F6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
+      >
+        <LinearGradient
+          colors={colorScheme === 'dark' ? Gradients.cardAurora : ['#FFFFFF', '#F3F4F6']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         <View style={styles.topBar}>
           <View style={styles.brandRow}>
             <Image
@@ -204,7 +213,8 @@ export default function ProfileScreen() {
             <StyledButton title="Update Details" onPress={handleUpdate} />
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -216,7 +226,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 12 : 6,
-    paddingBottom: 42,
+    paddingBottom: 140,
   },
   topBar: {
     flexDirection: 'row',

@@ -10,6 +10,7 @@ import { AnimatedEntrance } from '@/src/components/AnimatedEntrance';
 import { GradientBankCard } from '@/src/components/GradientBankCard';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { SummaryCard } from '@/src/components/SummaryCard';
+import { StyledInput } from '@/src/components/StyledInput';
 import { ThemeToggleButton } from '@/src/components/ThemeToggleButton';
 import { TransactionItem } from '@/src/components/TransactionItem';
 import { useFinanceStore } from '@/src/store/useFinanceStore';
@@ -29,6 +30,8 @@ export default function HomeScreen() {
   const theme = Colors[colorScheme ?? 'dark'];
   const { user, transactions, categories } = useFinanceStore();
   const [expenseFilter, setExpenseFilter] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { incomeTotal, expenseTotal, filteredExpenseTransactions } = useMemo(() => {
     const today = startOfDay(new Date());
@@ -40,6 +43,15 @@ export default function HomeScreen() {
       return !Number.isNaN(transactionDate.getTime()) && transactionDate >= periodStart;
     });
 
+    const matchingExpenses = visibleTransactions
+      .filter((transaction) => transaction.type === 'expense')
+      .filter((transaction) => {
+        if (!searchQuery.trim()) return true;
+        const category = categories.find((item) => item.id === transaction.category);
+        const searchTarget = `${transaction.note ?? ''} ${category?.name ?? ''}`.toLowerCase();
+        return searchTarget.includes(searchQuery.trim().toLowerCase());
+      });
+
     return {
       incomeTotal: visibleTransactions
         .filter((transaction) => transaction.type === 'income')
@@ -47,11 +59,9 @@ export default function HomeScreen() {
       expenseTotal: visibleTransactions
         .filter((transaction) => transaction.type === 'expense')
         .reduce((sum, transaction) => sum + transaction.amount, 0),
-      filteredExpenseTransactions: visibleTransactions
-        .filter((transaction) => transaction.type === 'expense')
-        .slice(0, 4),
+      filteredExpenseTransactions: matchingExpenses.slice(0, 4),
     };
-  }, [expenseFilter, transactions]);
+  }, [categories, expenseFilter, searchQuery, transactions]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -78,7 +88,10 @@ export default function HomeScreen() {
 
           <View style={styles.headerIcons}>
             <ThemeToggleButton />
-            <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+            <TouchableOpacity
+              style={[styles.iconButton, { backgroundColor: theme.surface, borderColor: theme.outline }]}
+              onPress={() => setShowSearch((value) => !value)}
+            >
               <Search color={theme.text} size={18} />
             </TouchableOpacity>
             <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
@@ -96,6 +109,19 @@ export default function HomeScreen() {
             Here's your financial pulse for today.
           </Text>
         </AnimatedEntrance>
+
+        {showSearch ? (
+          <AnimatedEntrance delay={70}>
+            <StyledInput
+              label="Search expenses"
+              placeholder="Search by note or category"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              style={styles.searchInput}
+            />
+          </AnimatedEntrance>
+        ) : null}
 
         <AnimatedEntrance delay={120} style={styles.cardSection} scale={0.96}>
           <GradientBankCard balance={user.balance} name={user.name} />
@@ -238,6 +264,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     marginBottom: 22,
+  },
+  searchInput: {
+    marginBottom: 8,
   },
   cardSection: {
     marginBottom: 20,

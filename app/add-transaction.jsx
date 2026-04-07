@@ -115,7 +115,8 @@ export default function AddTransactionScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
     >
       <LinearGradient
         colors={colorScheme === 'dark' ? Gradients.cardAurora : ['#FFFFFF', '#F2F4F7']}
@@ -124,7 +125,11 @@ export default function AddTransactionScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <AnimatedEntrance delay={30}>
           <View style={styles.headerRow}>
             <TouchableOpacity
@@ -318,7 +323,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 160,
   },
   heading: {
     fontSize: 30,

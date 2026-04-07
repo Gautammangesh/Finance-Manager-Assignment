@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -19,6 +19,7 @@ export const StyledButton = ({
   const theme = Colors[colorScheme ?? 'dark'];
   const isOutline = variant === 'outline';
   const isGhost = variant === 'ghost';
+  const filledTextColor = colorScheme === 'dark' ? '#111111' : '#FFFFFF';
 
   const getColors = () => {
     switch (variant) {
@@ -28,7 +29,7 @@ export const StyledButton = ({
         return Gradients.danger;
       case 'primary':
       default:
-        return Gradients.primary;
+        return colorScheme === 'dark' ? ['#F5F5F4', '#DAD9D4'] : ['#17181C', '#2A2C31'];
     }
   };
 
@@ -39,42 +40,74 @@ export const StyledButton = ({
       style={[
         styles.button,
         styles[size],
-        { borderColor: theme.outline, backgroundColor: isGhost ? theme.surface : 'transparent' },
+        {
+          borderColor: isOutline ? theme.outline : 'transparent',
+          backgroundColor: isGhost ? theme.surface : 'transparent',
+          shadowColor: theme.shadow,
+        },
         isOutline && styles.outlineButton,
+        isGhost && { borderColor: theme.outline },
         disabled && styles.disabled,
         style,
       ]}
     >
-      {!isOutline && !isGhost ? (
-        <LinearGradient colors={getColors()} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-      ) : null}
-      {loading ? (
-        <ActivityIndicator color={isOutline || isGhost ? theme.text : (colorScheme === 'dark' ? '#111111' : '#FFFFFF')} />
-      ) : (
-        <Text
-          style={[
-            styles.text,
-            { color: isOutline || isGhost ? theme.text : (colorScheme === 'dark' ? '#111111' : '#FFFFFF') },
-            size === 'small' && styles.smallText,
-          ]}
-        >
-          {title}
-        </Text>
-      )}
+      <View style={styles.content}>
+        {!isOutline && !isGhost ? (
+          <LinearGradient
+            colors={getColors()}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.fillLayer}
+          />
+        ) : null}
+        {loading ? (
+          <ActivityIndicator color={isOutline || isGhost ? theme.text : filledTextColor} />
+        ) : (
+          <Text
+            style={[
+              styles.text,
+              { color: isOutline || isGhost ? theme.text : filledTextColor },
+              size === 'small' && styles.smallText,
+            ]}
+          >
+            {title}
+          </Text>
+        )}
+      </View>
     </ScalePressable>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
+    width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
+    position: 'relative',
+    shadowOpacity: 0.12,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowRadius: 18,
+    elevation: 3,
   },
   outlineButton: {
     backgroundColor: 'transparent',
+  },
+  content: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  fillLayer: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
   },
   small: {
     minHeight: 42,
@@ -92,6 +125,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
     letterSpacing: 0.2,
+    textAlign: 'center',
   },
   smallText: {
     fontSize: 14,

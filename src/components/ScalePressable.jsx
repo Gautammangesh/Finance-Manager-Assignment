@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Animated, Pressable } from 'react-native';
+import { Animated, Pressable, StyleSheet } from 'react-native';
 
 export const ScalePressable = ({ children, style, onPress, disabled, activeOpacityScale = 0.97, ...props }) => {
   const scale = useRef(new Animated.Value(1)).current;
@@ -21,9 +21,19 @@ export const ScalePressable = ({ children, style, onPress, disabled, activeOpaci
         onPress={onPress}
         onPressIn={() => animateTo(activeOpacityScale)}
         onPressOut={() => animateTo(1)}
+        style={styles.pressable}
       >
         {children}
       </Pressable>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  pressable: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
