@@ -1,8 +1,12 @@
 # Finance Manager / Expense Tracker
 
+> A polished fintech-style mobile app for tracking income, expenses, analytics, and smarter money habits.
+
 A modern fintech-style mobile app built for the Finance Manager App Assignment using Expo and React Native. The app helps users track income and expenses, monitor category-based spending, view financial summaries, and manage everything locally with a polished dark/light experience.
 
 ## Overview
+
+### Why this project?
 
 This project focuses on:
 - clean mobile-first UI/UX
@@ -15,38 +19,38 @@ The app includes the assignment core flows along with a few standout additions l
 ## Features
 
 ### Core Features
-- Add income and expense transactions
-- Transaction fields: amount, category, date, and note
-- Form validation for transaction creation
-- Category-based tracking with icons and color distinction
-- Weekly, monthly, and yearly finance views
-- Financial summary with balance, income, and expense visibility
-- Local persistence using AsyncStorage
-- Bottom tab navigation with 3 primary sections
-- Dark, light, and system theme support
-- Gradient-based fintech-style UI
-- Keyboard-aware forms for smoother mobile UX
+- 💸 Add income and expense transactions
+- 📝 Transaction fields: amount, category, date, and note
+- ✅ Form validation for transaction creation
+- 🏷️ Category-based tracking with icons and color distinction
+- 📆 Weekly, monthly, and yearly finance views
+- 📊 Financial summary with balance, income, and expense visibility
+- 💾 Local persistence using AsyncStorage
+- 🧭 Bottom tab navigation with 3 primary sections
+- 🌗 Dark, light, and system theme support
+- 🎨 Gradient-based fintech-style UI
+- ⌨️ Keyboard-aware forms for smoother mobile UX
 
 ### Standout Features
-- Smart insights card on the Home screen
-- Search and filter on the transactions screen
-- Undo delete flow for removed transactions
-- Spending by category donut chart
-- Cash flow trend line chart
-- Animated entrances and micro-interactions
-- Better empty states and polished visual hierarchy
+- ✨ Smart insights card on the Home screen
+- 🔎 Search and filter on the transactions screen
+- ↩️ Undo delete flow for removed transactions
+- 🍩 Spending by category donut chart
+- 📈 Cash flow trend line chart
+- 🎬 Animated entrances and micro-interactions
+- 👻 Better empty states and polished visual hierarchy
 
 ## Tech Stack
 
-- Expo
-- React Native
-- Expo Router
-- Zustand
-- AsyncStorage
-- react-native-gifted-charts
-- react-native-gesture-handler
-- expo-linear-gradient
-- lucide-react-native
+- ⚡ Expo
+- 📱 React Native
+- 🧭 Expo Router
+- 🗂️ Zustand
+- 💾 AsyncStorage
+- 📊 react-native-gifted-charts
+- 👆 react-native-gesture-handler
+- 🌈 expo-linear-gradient
+- 🧩 lucide-react-native
 
 ## Project Structure
 
@@ -93,8 +97,8 @@ npx expo start --clear --tunnel
 
 ### 4. Run on device
 
-- Install Expo Go on your Android or iOS device
-- Scan the QR code shown in the terminal
+- 📲 Install Expo Go on your Android or iOS device
+- 🔍 Scan the QR code shown in the terminal
 
 ### 5. Run checks
 
@@ -139,9 +143,9 @@ Shows profile preview/edit flow along with dark/light/system theme switching.
 ## Testing
 
 The project has been validated with:
-- TypeScript check via `npx tsc --noEmit`
-- Jest tests via `npm test -- --runInBand`
-- Expo environment validation via `npx expo-doctor`
+- 🧪 TypeScript check via `npx tsc --noEmit`
+- ✅ Jest tests via `npm test -- --runInBand`
+- 🩺 Expo environment validation via `npx expo-doctor`
 
 Current automated coverage includes:
 - adding transactions
@@ -154,19 +158,19 @@ Current automated coverage includes:
 ## Assignment Requirements Mapping
 
 ### Mandatory Requirements
-- Gradient-based UI: implemented
-- Dark / Light mode toggle: implemented
-- Bottom Tab Navigation: implemented
-- Animations: implemented
-- Keyboard handling: implemented
-- Local storage: implemented
+- 🎨 Gradient-based UI: implemented
+- 🌗 Dark / Light mode toggle: implemented
+- 🧭 Bottom Tab Navigation: implemented
+- 🎬 Animations: implemented
+- ⌨️ Keyboard handling: implemented
+- 💾 Local storage: implemented
 
 ### Feature Requirements
-- Add income / expense: implemented
-- Fields: amount, category, date, note: implemented
-- Form validation: implemented
-- Category-based tracking: implemented
-- Monthly summary: implemented
+- 💸 Add income / expense: implemented
+- 📝 Fields: amount, category, date, note: implemented
+- ✅ Form validation: implemented
+- 🏷️ Category-based tracking: implemented
+- 📊 Monthly summary: implemented
 
 ## Notes
 
