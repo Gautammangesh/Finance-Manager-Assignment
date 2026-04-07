@@ -1,8 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
-import { Colors } from '@/src/theme';
-import { useColorScheme } from '@/components/useColorScheme';
+import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+import { useColorScheme } from '@/components/useColorScheme';
+import { ScalePressable } from '@/src/components/ScalePressable';
+import { Colors, Gradients } from '@/src/theme';
 
 export const StyledButton = ({
   title,
@@ -15,68 +17,86 @@ export const StyledButton = ({
 }) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
+  const isOutline = variant === 'outline';
+  const isGhost = variant === 'ghost';
 
   const getColors = () => {
     switch (variant) {
-      case 'primary': return [theme.primary, theme.secondary];
-      case 'secondary': return [theme.secondary, theme.accent];
-      case 'danger': return [theme.danger, '#EF4444'];
-      default: return [theme.surface, theme.surfaceLighter];
+      case 'secondary':
+        return Gradients.accent;
+      case 'danger':
+        return Gradients.danger;
+      case 'primary':
+      default:
+        return Gradients.primary;
     }
   };
 
-  const isOutline = variant === 'outline';
-
   return (
-    <TouchableOpacity
+    <ScalePressable
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
       style={[
         styles.button,
         styles[size],
-        isOutline && { borderWidth: 1, borderColor: theme.primary },
-        disabled && { opacity: 0.5 },
+        { borderColor: theme.outline, backgroundColor: isGhost ? theme.surface : 'transparent' },
+        isOutline && styles.outlineButton,
+        disabled && styles.disabled,
         style,
       ]}
     >
-      {!isOutline ? (
-        <LinearGradient
-          colors={getColors()}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+      {!isOutline && !isGhost ? (
+        <LinearGradient colors={getColors()} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
       ) : null}
       {loading ? (
-        <ActivityIndicator color={isOutline ? theme.primary : '#FFF'} />
+        <ActivityIndicator color={isOutline || isGhost ? theme.text : (colorScheme === 'dark' ? '#111111' : '#FFFFFF')} />
       ) : (
         <Text
           style={[
             styles.text,
-            isOutline ? { color: theme.primary } : { color: '#FFF' },
-            size === 'small' && { fontSize: 14 },
+            { color: isOutline || isGhost ? theme.text : (colorScheme === 'dark' ? '#111111' : '#FFFFFF') },
+            size === 'small' && styles.smallText,
           ]}
         >
           {title}
         </Text>
       )}
-    </TouchableOpacity>
+    </ScalePressable>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
   },
-  small: { paddingVertical: 8, paddingHorizontal: 16 },
-  medium: { paddingVertical: 14, paddingHorizontal: 24 },
-  large: { paddingVertical: 18, paddingHorizontal: 32 },
+  outlineButton: {
+    backgroundColor: 'transparent',
+  },
+  small: {
+    minHeight: 42,
+    paddingHorizontal: 16,
+  },
+  medium: {
+    minHeight: 54,
+    paddingHorizontal: 24,
+  },
+  large: {
+    minHeight: 60,
+    paddingHorizontal: 28,
+  },
   text: {
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
+    letterSpacing: 0.2,
+  },
+  smallText: {
+    fontSize: 14,
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

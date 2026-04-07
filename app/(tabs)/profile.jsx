@@ -1,125 +1,207 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/src/theme';
+import { RefreshCcw, Search, Bell } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { useColorScheme } from '@/components/useColorScheme';
-import { useFinanceStore } from '@/src/store/useFinanceStore';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
-import { StyledInput } from '@/src/components/StyledInput';
 import { StyledButton } from '@/src/components/StyledButton';
-import { User, Mail, CreditCard, LogOut, ChevronRight, Settings } from 'lucide-react-native';
+import { StyledInput } from '@/src/components/StyledInput';
+import { ThemeToggleButton } from '@/src/components/ThemeToggleButton';
+import { useFinanceStore } from '@/src/store/useFinanceStore';
+import { Colors, Gradients } from '@/src/theme';
 
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
-  const { user, transactions, updateProfile } = useFinanceStore();
-  const [viewMode, setViewMode] = useState(0); // 0: Preview, 1: Edit
-
+  const { user, transactions, updateProfile, resetDemoData, themeMode, setThemeMode } = useFinanceStore();
+  const [viewMode, setViewMode] = useState(0);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const totalSpent = transactions
-    .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
+  const stats = useMemo(() => {
+    const totalSpent = transactions
+      .filter((transaction) => transaction.type === 'expense')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const totalIncome = transactions
+      .filter((transaction) => transaction.type === 'income')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    return {
+      totalSpent,
+      totalIncome,
+      transactionCount: transactions.length,
+    };
+  }, [transactions]);
 
   const handleUpdate = () => {
-    updateProfile({ name, email });
+    if (!name.trim() || !email.trim()) {
+      setError('Name and email are required');
+      return;
+    }
+
+    if (password || confirmPassword) {
+      if (password.length < 6) {
+        setError('Password should be at least 6 characters');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+    }
+
+    updateProfile({ name: name.trim(), email: email.trim() });
+    setPassword('');
+    setConfirmPassword('');
+    setError('');
     setViewMode(0);
   };
 
+  const handleResetDemo = () => {
+    Alert.alert(
+      'Reset demo data',
+      'This will restore the starter transactions and profile values for the app.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Reset', style: 'destructive', onPress: () => resetDemoData() },
+      ]
+    );
+  };
+
+  const themeIndex = themeMode === 'dark' ? 1 : themeMode === 'light' ? 2 : 0;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.text }]}>Profile</Text>
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.surface }]}>
-          <Settings color={theme.textSecondary} size={20} />
-        </TouchableOpacity>
-      </View>
+      <LinearGradient
+        colors={colorScheme === 'dark' ? Gradients.cardAurora : ['#FFFFFF', '#F3F4F6']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* User Info Header */}
-        <View style={styles.userInfoWrapper}>
-          <View style={[styles.avatarWrapper, { backgroundColor: theme.primary }]}>
-            <Text style={styles.avatarText}>{user.name[0]}</Text>
+        <View style={styles.topBar}>
+          <View style={styles.brandRow}>
+            <Image
+              source={require('@/assets/images/tuf-logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={[styles.brandText, { color: theme.text }]}>TUF</Text>
           </View>
-          <View style={styles.userNameWrapper}>
-            <Text style={[styles.userName, { color: theme.text }]}>{user.name}</Text>
-            <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{user.email}</Text>
-          </View>
-        </View>
-
-        {/* Preview / Edit Toggle */}
-        <View style={styles.tabWrapper}>
-          <SegmentedControl
-            values={['Preview', 'Edit']}
-            selectedIndex={viewMode}
-            onChange={setViewMode}
-          />
-        </View>
-
-        {viewMode === 0 ? (
-          /* Preview Mode */
-          <View style={styles.previewSection}>
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <View style={styles.statInfo}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total spendings:</Text>
-                <Text style={[styles.statValue, { color: theme.text }]}>${totalSpent.toLocaleString()}</Text>
+          <View style={styles.icons}>
+            <ThemeToggleButton />
+            <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+              <Bell color={theme.text} size={18} />
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>2</Text>
               </View>
-              <ChevronRight color={theme.textSecondary} size={20} />
-            </View>
-
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <View style={styles.statInfo}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Email :</Text>
-                <Text style={[styles.statValue, { color: theme.text }]}>{user.email}</Text>
-              </View>
-              <ChevronRight color={theme.textSecondary} size={20} />
-            </View>
-
-            <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
-              <View style={styles.statInfo}>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Balance :</Text>
-                <Text style={[styles.statValue, { color: theme.text }]}>${user.balance.toLocaleString()}</Text>
-              </View>
-              <ChevronRight color={theme.textSecondary} size={20} />
-            </View>
-
-            <TouchableOpacity style={styles.logoutButton}>
-              <LogOut color={theme.danger} size={20} />
-              <Text style={[styles.logoutText, { color: theme.danger }]}>Sign Out</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={styles.profileRow}>
+          <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+            <Text style={[styles.avatarText, { color: colorScheme === 'dark' ? '#121212' : '#FFFFFF' }]}>
+              {user.name[0]}
+            </Text>
+          </View>
+          <View style={styles.profileText}>
+            <Text style={[styles.name, { color: theme.text }]}>{user.name}</Text>
+            <Text style={[styles.email, { color: theme.textSecondary }]}>{user.email}</Text>
+          </View>
+        </View>
+
+        <SegmentedControl
+          values={['Preview', 'Edit']}
+          selectedIndex={viewMode}
+          onChange={setViewMode}
+          style={styles.segmentControl}
+        />
+
+        {viewMode === 0 ? (
+          <>
+            <View style={styles.statGrid}>
+              <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+                <Text style={[styles.statLabel, { color: theme.textMuted }]}>Total spendings</Text>
+                <Text style={[styles.statValue, { color: theme.text }]}>${stats.totalSpent.toLocaleString()}</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+                <Text style={[styles.statLabel, { color: theme.textMuted }]}>Total income</Text>
+                <Text style={[styles.statValue, { color: theme.text }]}>${stats.totalIncome.toLocaleString()}</Text>
+              </View>
+            </View>
+
+            <View style={[styles.detailCard, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+              <Text style={[styles.detailLabel, { color: theme.textMuted }]}>Email</Text>
+              <Text style={[styles.detailValue, { color: theme.text }]}>{user.email}</Text>
+              <Text style={[styles.detailLabel, styles.spacedLabel, { color: theme.textMuted }]}>Balance</Text>
+              <Text style={[styles.detailValue, { color: theme.text }]}>${user.balance.toLocaleString()}</Text>
+              <Text style={[styles.detailLabel, styles.spacedLabel, { color: theme.textMuted }]}>Transactions</Text>
+              <Text style={[styles.detailValue, { color: theme.text }]}>{stats.transactionCount} tracked</Text>
+            </View>
+
+            <View style={[styles.detailCard, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
+              <Text style={[styles.detailLabel, { color: theme.textMuted }]}>Security & Data</Text>
+              <Text style={[styles.helperText, { color: theme.textSecondary }]}>
+                Managed password and clear historical logs for the application.
+              </Text>
+              <StyledButton title="Reset Demo Data" variant="outline" onPress={handleResetDemo} />
+            </View>
+          </>
         ) : (
-          /* Edit Mode */
           <View style={styles.editSection}>
             <StyledInput
               label="Full Name"
               placeholder="Enter your full name"
               value={name}
-              onChangeText={setName}
-              style={styles.input}
+              onChangeText={(text) => {
+                setName(text);
+                setError('');
+              }}
+              autoCapitalize="words"
             />
             <StyledInput
               label="Email"
               placeholder="Enter your email"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                setError('');
+              }}
               keyboardType="email-address"
-              style={styles.input}
+              autoCapitalize="none"
             />
             <StyledInput
               label="Password"
               placeholder="Create a password"
-              value="********"
-              onChangeText={() => {}}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                setError('');
+              }}
               secureTextEntry
-              style={styles.input}
+              autoCapitalize="none"
             />
-            <StyledButton
-              title="Update Details"
-              onPress={handleUpdate}
-              style={styles.updateButton}
+            <StyledInput
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text);
+                setError('');
+              }}
+              secureTextEntry
+              autoCapitalize="none"
+              error={error}
             />
+            <StyledButton title="Update Details" onPress={handleUpdate} />
           </View>
         )}
       </ScrollView>
@@ -131,102 +213,141 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 12 : 6,
+    paddingBottom: 42,
+  },
+  topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 10,
-    marginBottom: 24,
+    marginBottom: 22,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    marginRight: 10,
+  },
+  brandText: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  icons: {
+    flexDirection: 'row',
   },
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    marginLeft: 10,
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#FF4D57',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
   },
-  userInfoWrapper: {
+  profileRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
-  avatarWrapper: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   avatarText: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '800',
   },
-  userNameWrapper: {
+  profileText: {
     flex: 1,
   },
-  userName: {
+  name: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
     marginBottom: 4,
   },
-  userEmail: {
+  email: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '500',
   },
-  tabWrapper: {
-    marginBottom: 32,
+  segmentControl: {
+    marginBottom: 18,
   },
-  previewSection: {
-    gap: 16,
+  statGrid: {
+    flexDirection: 'row',
+    marginHorizontal: -6,
+    marginBottom: 14,
   },
   statCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 20,
-  },
-  statInfo: {
     flex: 1,
+    marginHorizontal: 6,
+    padding: 16,
+    borderRadius: 22,
+    borderWidth: 1,
   },
   statLabel: {
     fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 4,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 10,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  detailCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 18,
+    marginBottom: 16,
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  spacedLabel: {
+    marginTop: 18,
+  },
+  detailValue: {
+    fontSize: 17,
     fontWeight: '700',
   },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 32,
-    padding: 16,
-    gap: 8,
+  helperText: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 14,
   },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: '600',
+  themeControl: {
+    marginTop: 2,
   },
   editSection: {
-    paddingVertical: 8,
-  },
-  input: {
-    marginBottom: 20,
-  },
-  updateButton: {
-    marginTop: 12,
+    paddingTop: 4,
   },
 });

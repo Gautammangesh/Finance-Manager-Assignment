@@ -1,7 +1,8 @@
-import { View, TextInput, Text, StyleSheet, Platform } from 'react-native';
-import { Colors } from '@/src/theme';
-import { useColorScheme } from '@/components/useColorScheme';
 import React from 'react';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+
+import { useColorScheme } from '@/components/useColorScheme';
+import { Colors } from '@/src/theme';
 
 export const StyledInput = ({
   label,
@@ -12,31 +13,43 @@ export const StyledInput = ({
   keyboardType = 'default',
   error,
   style,
+  multiline = false,
+  autoCapitalize = 'sentences',
 }) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
 
   return (
     <View style={[styles.container, style]}>
-      {label && <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>}
+      {label ? <Text style={[styles.label, { color: theme.text }]}>{label}</Text> : null}
       <View
         style={[
           styles.inputWrapper,
-          { backgroundColor: theme.surface, borderColor: error ? theme.danger : theme.divider },
-          error && styles.errorBorder,
+          {
+            backgroundColor: theme.surface,
+            borderColor: error ? theme.danger : theme.outline,
+            shadowColor: theme.shadow,
+          },
+          multiline && styles.multilineWrapper,
         ]}
       >
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={theme.textSecondary}
+          placeholderTextColor={theme.textMuted}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
-          style={[styles.input, { color: theme.text }]}
+          multiline={multiline}
+          autoCapitalize={autoCapitalize}
+          style={[
+            styles.input,
+            multiline && styles.multilineInput,
+            { color: theme.text },
+          ]}
         />
       </View>
-      {error && <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>}
+      {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
     </View>
   );
 };
@@ -44,41 +57,47 @@ export const StyledInput = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 10,
   },
   inputWrapper: {
-    height: 56,
+    minHeight: 48,
     borderRadius: 14,
-    borderWidth: 1.5,
-    paddingHorizontal: 16,
+    borderWidth: 1,
+    paddingHorizontal: 14,
     justifyContent: 'center',
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.14,
+        shadowRadius: 14,
       },
       android: {
-        elevation: 2,
+        elevation: 1.5,
       },
     }),
   },
-  input: {
-    fontSize: 16,
-    height: '100%',
+  multilineWrapper: {
+    minHeight: 90,
+    paddingVertical: 12,
   },
-  errorBorder: {
-    borderColor: '#EF4444',
+  input: {
+    fontSize: 15,
+    minHeight: 22,
+    paddingVertical: 0,
+  },
+  multilineInput: {
+    minHeight: 70,
+    textAlignVertical: 'top',
   },
   errorText: {
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 6,
     marginLeft: 4,
+    fontWeight: '500',
   },
 });

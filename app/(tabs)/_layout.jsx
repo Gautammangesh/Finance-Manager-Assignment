@@ -1,29 +1,34 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
+import { Home, User, Wallet } from 'lucide-react-native';
+
 import { useColorScheme } from '@/components/useColorScheme';
 import { Colors } from '@/src/theme';
-import { Home, Wallet, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const activeColor = Colors[colorScheme ?? 'dark'].primary;
-  const inactiveColor = Colors[colorScheme ?? 'dark'].textSecondary;
-  const bgColor = Colors[colorScheme ?? 'dark'].background;
+  const theme = Colors[colorScheme ?? 'dark'];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: activeColor,
-        tabBarInactiveTintColor: inactiveColor,
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
-          backgroundColor: bgColor,
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 60,
+          backgroundColor: theme.backgroundElevated,
+          borderTopColor: theme.outline,
+          borderTopWidth: 1,
+          height: 72,
+          paddingTop: 8,
           paddingBottom: 10,
         },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+        },
         headerShown: false,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -34,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Wallet',
+          title: 'Balances',
           tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
         }}
       />

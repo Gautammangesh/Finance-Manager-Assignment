@@ -1,43 +1,36 @@
 import React from 'react';
-import { StyleSheet, View, Text, Platform } from 'react-native';
-import { Colors, Gradients } from '@/src/theme';
-import { useColorScheme } from '@/components/useColorScheme';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Wifi } from 'lucide-react-native';
+import { RefreshCcw } from 'lucide-react-native';
 
-export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0329', variant = 'blue' }) => {
-  const colorScheme = useColorScheme();
-  
-  const getGradients = () => {
-    switch (variant) {
-      case 'purple': return Gradients.cardPurple;
-      case 'green': return Gradients.cardGreen;
-      case 'dark': return Gradients.cardDark;
-      default: return Gradients.cardBlue;
-    }
-  };
+import { Gradients } from '@/src/theme';
+
+export const GradientBankCard = ({
+  balance,
+  name,
+  cardNumber = '8763 1111 2222 0329',
+}) => {
+  const maskedName = name.toUpperCase();
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={getGradients()}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
-      >
+    <View style={styles.shell}>
+      <LinearGradient colors={Gradients.cardMint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.bankName}>ADRBank</Text>
-          <Wifi color="rgba(255,255,255,0.6)" size={24} style={styles.nfcIcon} />
+          <View style={styles.iconBadge}>
+            <RefreshCcw color="#FFFFFF" size={18} />
+          </View>
         </View>
 
-        <Text style={styles.balance}>${balance.toLocaleString()}</Text>
-
-        <Text style={styles.cardNumber}>{cardNumber}</Text>
+        <View>
+          <Text style={styles.cardNumber}>{cardNumber}</Text>
+          <Text style={styles.balance}>${balance.toLocaleString()}</Text>
+        </View>
 
         <View style={styles.footer}>
           <View>
             <Text style={styles.label}>Card Holder Name</Text>
-            <Text style={styles.value}>{name.toUpperCase()}</Text>
+            <Text style={styles.value}>{maskedName}</Text>
           </View>
           <View style={styles.rightFooter}>
             <Text style={styles.label}>Expired Date</Text>
@@ -50,26 +43,24 @@ export const GradientBankCard = ({ balance, name, cardNumber = '8763 1111 2222 0
 };
 
 const styles = StyleSheet.create({
-  container: {
-    height: 200,
-    width: '100%',
-    borderRadius: 24,
+  shell: {
+    borderRadius: 28,
     overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 16 },
+        shadowOpacity: 0.18,
+        shadowRadius: 28,
       },
       android: {
         elevation: 10,
       },
     }),
   },
-  gradient: {
-    flex: 1,
-    padding: 24,
+  card: {
+    minHeight: 168,
+    padding: 22,
     justifyContent: 'space-between',
   },
   header: {
@@ -78,26 +69,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bankName: {
-    color: '#FFF',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 22,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: -0.3,
   },
-  nfcIcon: {
-    transform: [{ rotate: '90deg' }],
-  },
-  balance: {
-    color: '#FFF',
-    fontSize: 32,
-    fontWeight: '700',
-    marginTop: 8,
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardNumber: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '500',
-    letterSpacing: 2,
-    marginTop: 16,
+    color: 'rgba(255,255,255,0.95)',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1.1,
+    marginBottom: 8,
+  },
+  balance: {
+    color: '#FFFFFF',
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -1.1,
   },
   footer: {
     flexDirection: 'row',
@@ -108,15 +104,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   label: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.72)',
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: '700',
     marginBottom: 4,
     textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   value: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

@@ -25,6 +25,7 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+expo-*.log
 
 # macOS
 .DS_Store
@@ -48,3 +49,7 @@ experiment_results.md
 # generated native folders
 /ios
 /android
+
+# local IDE / system folders
+.idea/
+Microsoft/

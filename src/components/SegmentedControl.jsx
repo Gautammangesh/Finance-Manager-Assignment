@@ -1,33 +1,48 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated } from 'react-native';
-import { Colors } from '@/src/theme';
+import { StyleSheet, Text, View } from 'react-native';
+
 import { useColorScheme } from '@/components/useColorScheme';
+import { ScalePressable } from '@/src/components/ScalePressable';
+import { Colors } from '@/src/theme';
 
 export const SegmentedControl = ({ values, selectedIndex, onChange, style }) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.surface }, style]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.surface,
+          borderColor: theme.outline,
+        },
+        style,
+      ]}
+    >
       {values.map((value, index) => {
         const isSelected = selectedIndex === index;
+
         return (
-          <TouchableOpacity
+          <ScalePressable
             key={value}
             onPress={() => onChange(index)}
-            activeOpacity={0.8}
             style={[
               styles.segment,
-              isSelected && { backgroundColor: theme.background, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 }
+              isSelected && {
+                backgroundColor: theme.primary,
+              },
             ]}
           >
-            <Text style={[
-              styles.text, 
-              { color: isSelected ? theme.text : theme.textSecondary }
-            ]}>
+            <Text
+              style={[
+                styles.text,
+                { color: isSelected ? theme.background : theme.textSecondary },
+              ]}
+            >
               {value}
             </Text>
-          </TouchableOpacity>
+          </ScalePressable>
         );
       })}
     </View>
@@ -37,18 +52,20 @@ export const SegmentedControl = ({ values, selectedIndex, onChange, style }) => 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 4,
-    height: 48,
+    minHeight: 48,
+    borderWidth: 1,
   },
   segment: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    minHeight: 40,
   },
   text: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
