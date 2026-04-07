@@ -25,14 +25,7 @@ export const TransactionItem = ({ transaction, category, index = 0 }) => {
   const isIncome = transaction.type === 'income';
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete transaction',
-      'This transaction will be removed from your timeline and balance.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteTransaction(transaction.id) },
-      ]
-    );
+    deleteTransaction(transaction.id);
   };
   
   const renderRightActions = () => {
@@ -57,7 +50,16 @@ export const TransactionItem = ({ transaction, category, index = 0 }) => {
       >
         <TouchableOpacity
           activeOpacity={0.85}
-          onLongPress={handleDelete}
+          onLongPress={() =>
+            Alert.alert(
+              'Delete transaction',
+              'This transaction will be removed from your timeline and balance.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => deleteTransaction(transaction.id) },
+              ]
+            )
+          }
           style={[
             styles.container,
             {

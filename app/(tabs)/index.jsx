@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, Ghost, Plus, Search } from 'lucide-react-native';
+import { Bell, Ghost, Plus, Search, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -13,6 +13,7 @@ import { SummaryCard } from '@/src/components/SummaryCard';
 import { StyledInput } from '@/src/components/StyledInput';
 import { ThemeToggleButton } from '@/src/components/ThemeToggleButton';
 import { TransactionItem } from '@/src/components/TransactionItem';
+import { UndoToast } from '@/src/components/UndoToast';
 import { useFinanceStore } from '@/src/store/useFinanceStore';
 import { Colors, Gradients } from '@/src/theme';
 
@@ -24,23 +25,44 @@ const startOfDay = (date) => {
   return value;
 };
 
+const formatCurrency = (value) => `$${Math.abs(Math.round(value)).toLocaleString()}`;
+
 export default function HomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
-  const { user, transactions, categories } = useFinanceStore();
+  const {
+    user,
+    transactions,
+    categories,
+    pendingUndoTransaction,
+    restoreLastDeletedTransaction,
+    clearPendingUndoTransaction,
+  } = useFinanceStore();
   const [expenseFilter, setExpenseFilter] = useState(0);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { incomeTotal, expenseTotal, filteredExpenseTransactions } = useMemo(() => {
+  const { incomeTotal, expenseTotal, filteredExpenseTransactions, insight } = useMemo(() => {
     const today = startOfDay(new Date());
+    const periodLength = expenseFilter === 0 ? 7 : 30;
     const periodStart = new Date(today);
-    periodStart.setDate(today.getDate() - (expenseFilter === 0 ? 6 : 29));
+    periodStart.setDate(today.getDate() - (periodLength - 1));
+    const previousPeriodStart = new Date(periodStart);
+    previousPeriodStart.setDate(periodStart.getDate() - periodLength);
 
     const visibleTransactions = transactions.filter((transaction) => {
       const transactionDate = new Date(transaction.date);
       return !Number.isNaN(transactionDate.getTime()) && transactionDate >= periodStart;
+    });
+
+    const previousTransactions = transactions.filter((transaction) => {
+      const transactionDate = new Date(transaction.date);
+      return (
+        !Number.isNaN(transactionDate.getTime()) &&
+        transactionDate >= previousPeriodStart &&
+        transactionDate < periodStart
+      );
     });
 
     const matchingExpenses = visibleTransactions
@@ -52,16 +74,99 @@ export default function HomeScreen() {
         return searchTarget.includes(searchQuery.trim().toLowerCase());
       });
 
+    const nextIncomeTotal = visibleTransactions
+      .filter((transaction) => transaction.type === 'income')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    const nextExpenseTotal = visibleTransactions
+      .filter((transaction) => transaction.type === 'expense')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    const previousExpenseTotal = previousTransactions
+      .filter((transaction) => transaction.type === 'expense')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    const categoryTotals = visibleTransactions
+      .filter((transaction) => transaction.type === 'expense')
+      .reduce((accumulator, transaction) => {
+        accumulator[transaction.category] = (accumulator[transaction.category] || 0) + transaction.amount;
+        return accumulator;
+      }, {});
+
+    const topCategoryEntry = Object.entries(categoryTotals).sort(([, a], [, b]) => b - a)[0];
+    const topCategory = topCategoryEntry
+      ? categories.find((category) => category.id === topCategoryEntry[0])
+      : null;
+
+    const expenseDelta = nextExpenseTotal - previousExpenseTotal;
+    const expenseDeltaPercent = previousExpenseTotal > 0
+      ? Math.round((Math.abs(expenseDelta) / previousExpenseTotal) * 100)
+      : 0;
+
+    let nextInsight = {
+      tone: 'neutral',
+      title: 'Build your money rhythm',
+      body: 'Add a few more transactions and this card will start surfacing smarter weekly patterns.',
+      badge: expenseFilter === 0 ? 'Weekly insight' : 'Monthly insight',
+      icon: Sparkles,
+    };
+
+    if (topCategory && topCategoryEntry?.[1] > 0) {
+      nextInsight = {
+        tone: 'warning',
+        title: `${topCategory.name} is leading your spend`,
+        body: `${formatCurrency(topCategoryEntry[1])} went to ${topCategory.name.toLowerCase()} in this ${expenseFilter === 0 ? 'week' : 'month'}.`,
+        badge: 'Top category',
+        icon: Wallet,
+      };
+    }
+
+    if (previousExpenseTotal > 0 && expenseDelta !== 0) {
+      nextInsight = {
+        tone: expenseDelta < 0 ? 'success' : 'warning',
+        title: expenseDelta < 0 ? 'Spending is trending down' : 'Spending picked up',
+        body: `${expenseDeltaPercent}% ${expenseDelta < 0 ? 'less' : 'more'} than the previous ${expenseFilter === 0 ? 'week' : 'month'} (${formatCurrency(previousExpenseTotal)} before).`,
+        badge: expenseDelta < 0 ? 'Positive shift' : 'Watch pace',
+        icon: expenseDelta < 0 ? TrendingDown : TrendingUp,
+      };
+    }
+
+    if (nextIncomeTotal > nextExpenseTotal && nextExpenseTotal > 0) {
+      nextInsight = {
+        tone: 'success',
+        title: 'You stayed cash-flow positive',
+        body: `Income outpaced expenses by ${formatCurrency(nextIncomeTotal - nextExpenseTotal)} in this ${expenseFilter === 0 ? 'week' : 'month'}.`,
+        badge: 'Healthy balance',
+        icon: TrendingUp,
+      };
+    }
+
     return {
-      incomeTotal: visibleTransactions
-        .filter((transaction) => transaction.type === 'income')
-        .reduce((sum, transaction) => sum + transaction.amount, 0),
-      expenseTotal: visibleTransactions
-        .filter((transaction) => transaction.type === 'expense')
-        .reduce((sum, transaction) => sum + transaction.amount, 0),
+      incomeTotal: nextIncomeTotal,
+      expenseTotal: nextExpenseTotal,
       filteredExpenseTransactions: matchingExpenses.slice(0, 4),
+      insight: nextInsight,
     };
   }, [categories, expenseFilter, searchQuery, transactions]);
+
+  const InsightIcon = insight.icon;
+  const insightAccent = insight.tone === 'success'
+    ? theme.success
+    : insight.tone === 'warning'
+      ? theme.warning
+      : theme.accent;
+
+  useEffect(() => {
+    if (!pendingUndoTransaction) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      clearPendingUndoTransaction();
+    }, 4000);
+
+    return () => clearTimeout(timeoutId);
+  }, [clearPendingUndoTransaction, pendingUndoTransaction]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -132,14 +237,44 @@ export default function HomeScreen() {
           <SummaryCard type="expense" amount={expenseTotal} caption="Spent this view" />
         </AnimatedEntrance>
 
-        <AnimatedEntrance delay={240} style={styles.sectionHeader}>
+        <AnimatedEntrance
+          delay={220}
+          style={[
+            styles.insightCard,
+            {
+              backgroundColor: theme.surface,
+              borderColor: theme.outline,
+              shadowColor: theme.shadow,
+            },
+          ]}
+          scale={0.98}
+        >
+          <LinearGradient
+            colors={colorScheme === 'dark' ? ['rgba(87,210,196,0.18)', 'rgba(139,124,255,0.06)'] : ['rgba(31,168,150,0.12)', 'rgba(101,88,245,0.04)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={styles.insightHeader}>
+            <View style={[styles.insightIconWrap, { backgroundColor: `${insightAccent}20` }]}>
+              <InsightIcon color={insightAccent} size={18} />
+            </View>
+            <View style={[styles.insightBadge, { backgroundColor: `${insightAccent}18` }]}>
+              <Text style={[styles.insightBadgeText, { color: insightAccent }]}>{insight.badge}</Text>
+            </View>
+          </View>
+          <Text style={[styles.insightTitle, { color: theme.text }]}>{insight.title}</Text>
+          <Text style={[styles.insightBody, { color: theme.textSecondary }]}>{insight.body}</Text>
+        </AnimatedEntrance>
+
+        <AnimatedEntrance delay={260} style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Your expenses</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/transactions')}>
             <Text style={[styles.linkText, { color: theme.textSecondary }]}>See all</Text>
           </TouchableOpacity>
         </AnimatedEntrance>
 
-        <AnimatedEntrance delay={300}>
+        <AnimatedEntrance delay={320}>
           <SegmentedControl
             values={EXPENSE_FILTERS}
             selectedIndex={expenseFilter}
@@ -161,7 +296,7 @@ export default function HomeScreen() {
             );
           })
         ) : (
-          <AnimatedEntrance delay={300}>
+          <AnimatedEntrance delay={340}>
             <View style={[styles.emptyState, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
               <Ghost color={theme.textSecondary} size={48} />
               <Text style={[styles.emptyTitle, { color: theme.text }]}>No expenses yet</Text>
@@ -188,6 +323,14 @@ export default function HomeScreen() {
       >
         <Plus color={colorScheme === 'dark' ? '#121212' : '#FFFFFF'} size={26} />
       </TouchableOpacity>
+
+      {pendingUndoTransaction ? (
+        <UndoToast
+          title="Transaction removed"
+          description={`${pendingUndoTransaction.note || 'Recent transaction'} was deleted from your timeline.`}
+          onUndo={restoreLastDeletedTransaction}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -274,7 +417,57 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     marginHorizontal: -6,
+    marginBottom: 18,
+  },
+  insightCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 18,
     marginBottom: 26,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.12,
+        shadowRadius: 18,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  insightIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  insightBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  insightBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  insightTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  insightBody: {
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '500',
   },
   sectionHeader: {
     flexDirection: 'row',

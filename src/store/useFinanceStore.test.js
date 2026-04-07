@@ -56,6 +56,19 @@ it('deletes a transaction and restores balance', () => {
 
   expect(state.transactions).toHaveLength(1);
   expect(state.user.balance).toBe(21000);
+  expect(state.pendingUndoTransaction?.id).toBe('seed-2');
+});
+
+it('restores the last deleted transaction via undo', () => {
+  useFinanceStore.getState().deleteTransaction('seed-2');
+  useFinanceStore.getState().restoreLastDeletedTransaction();
+
+  const state = useFinanceStore.getState();
+
+  expect(state.transactions).toHaveLength(2);
+  expect(state.transactions[0].id).toBe('seed-2');
+  expect(state.user.balance).toBe(20000);
+  expect(state.pendingUndoTransaction).toBeNull();
 });
 
 it('updates the user profile', () => {

@@ -48,6 +48,7 @@ export const useFinanceStore = create(
   persist(
     (set) => ({
       themeMode: 'system',
+      pendingUndoTransaction: null,
       user: {
         name: 'Alex Yu',
         email: 'alex@payu.com',
@@ -78,6 +79,7 @@ export const useFinanceStore = create(
 
           return {
             transactions: state.transactions.filter((transaction) => transaction.id !== id),
+            pendingUndoTransaction: transactionToDelete,
             user: {
               ...state.user,
               balance:
@@ -87,6 +89,30 @@ export const useFinanceStore = create(
             },
           };
         }),
+      restoreLastDeletedTransaction: () =>
+        set((state) => {
+          if (!state.pendingUndoTransaction) {
+            return state;
+          }
+
+          const transactionToRestore = state.pendingUndoTransaction;
+
+          return {
+            transactions: [transactionToRestore, ...state.transactions],
+            pendingUndoTransaction: null,
+            user: {
+              ...state.user,
+              balance:
+                transactionToRestore.type === 'income'
+                  ? state.user.balance + transactionToRestore.amount
+                  : state.user.balance - transactionToRestore.amount,
+            },
+          };
+        }),
+      clearPendingUndoTransaction: () =>
+        set(() => ({
+          pendingUndoTransaction: null,
+        })),
       updateProfile: (profile) =>
         set((state) => ({
           user: { ...state.user, ...profile },
@@ -113,6 +139,7 @@ export const useFinanceStore = create(
             balance: 20000,
           },
           themeMode: 'system',
+          pendingUndoTransaction: null,
           transactions: INITIAL_TRANSACTIONS,
           categories: DEFAULT_CATEGORIES,
         })),

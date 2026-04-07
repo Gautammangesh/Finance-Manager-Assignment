@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, Platform, StyleSheet, Text, View, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
@@ -7,12 +7,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
+import { StyledInput } from '@/src/components/StyledInput';
 import { ThemeToggleButton } from '@/src/components/ThemeToggleButton';
 import { TransactionItem } from '@/src/components/TransactionItem';
+import { UndoToast } from '@/src/components/UndoToast';
 import { Colors, Gradients } from '@/src/theme';
 import { useFinanceStore } from '@/src/store/useFinanceStore';
 
 const FILTER_OPTIONS = ['Weekly', 'Monthly', 'Yearly'];
+const TRANSACTION_FILTERS = ['All', 'Income', 'Expense'];
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const startOfDay = (date) => {
@@ -85,8 +88,17 @@ export default function TransactionsScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const { width } = useWindowDimensions();
-  const { transactions, categories, user } = useFinanceStore();
+  const {
+    transactions,
+    categories,
+    user,
+    pendingUndoTransaction,
+    restoreLastDeletedTransaction,
+    clearPendingUndoTransaction,
+  } = useFinanceStore();
   const [filterIndex, setFilterIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [transactionFilter, setTransactionFilter] = useState('All');
 
   const {
     chartData,
@@ -188,6 +200,50 @@ export default function TransactionsScreen() {
     };
   }, [categories, filterIndex, theme.secondary, theme.textMuted, transactions]);
 
+  const displayTransactions = useMemo(() => {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
+    return filteredTransactions.filter((transaction) => {
+      if (transactionFilter !== 'All' && transaction.type !== transactionFilter.toLowerCase()) {
+        return false;
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      const category = categories.find((item) => item.id === transaction.category);
+      const searchTarget = [
+        transaction.note,
+        category?.name,
+        transaction.type,
+        new Date(transaction.date).toLocaleDateString(),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return searchTarget.includes(normalizedSearch);
+    });
+  }, [categories, filteredTransactions, searchQuery, transactionFilter]);
+
+  const emptyStateTitle = searchQuery.trim() || transactionFilter !== 'All' ? 'No matching transactions' : 'No history here';
+  const emptyStateText = searchQuery.trim() || transactionFilter !== 'All'
+    ? 'Try a different keyword or switch the filter to see more activity.'
+    : getEmptyMessage(filterIndex);
+
+  useEffect(() => {
+    if (!pendingUndoTransaction) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      clearPendingUndoTransaction();
+    }, 4000);
+
+    return () => clearTimeout(timeoutId);
+  }, [clearPendingUndoTransaction, pendingUndoTransaction]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient
@@ -198,7 +254,7 @@ export default function TransactionsScreen() {
       />
 
       <FlatList
-        data={filteredTransactions}
+        data={displayTransactions}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -347,6 +403,44 @@ export default function TransactionsScreen() {
             )}
 
             <Text style={[styles.sectionTitle, { color: theme.text }]}>{sectionTitle}</Text>
+
+            <StyledInput
+              label="Search transactions"
+              placeholder="Search by note, category or type"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              style={styles.searchInput}
+            />
+
+            <View style={styles.filterRow}>
+              {TRANSACTION_FILTERS.map((filterValue) => {
+                const isActive = transactionFilter === filterValue;
+                return (
+                  <TouchableOpacity
+                    key={filterValue}
+                    activeOpacity={0.85}
+                    onPress={() => setTransactionFilter(filterValue)}
+                    style={[
+                      styles.filterChip,
+                      {
+                        backgroundColor: isActive ? theme.primary : theme.surface,
+                        borderColor: theme.outline,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        { color: isActive ? (colorScheme === 'dark' ? '#121212' : '#FFFFFF') : theme.textSecondary },
+                      ]}
+                    >
+                      {filterValue}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </>
         }
         renderItem={({ item, index }) => {
@@ -356,11 +450,19 @@ export default function TransactionsScreen() {
         ListEmptyComponent={
           <View style={[styles.emptyState, { backgroundColor: theme.surface, borderColor: theme.outline }]}>
             <Ghost color={theme.textSecondary} size={42} />
-            <Text style={[styles.emptyTitle, { color: theme.text }]}>No history here</Text>
-            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>{getEmptyMessage(filterIndex)}</Text>
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>{emptyStateTitle}</Text>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>{emptyStateText}</Text>
           </View>
         }
       />
+
+      {pendingUndoTransaction ? (
+        <UndoToast
+          title="Transaction removed"
+          description={`${pendingUndoTransaction.note || 'Recent transaction'} was deleted from this view.`}
+          onUndo={restoreLastDeletedTransaction}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -473,6 +575,28 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.4,
     marginBottom: 14,
+  },
+  searchInput: {
+    marginBottom: 4,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  filterChip: {
+    minHeight: 38,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: '800',
   },
   emptyState: {
     marginTop: 20,
