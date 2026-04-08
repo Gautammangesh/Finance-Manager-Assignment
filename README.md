@@ -166,53 +166,53 @@ npx expo-doctor
 ### 1. Home Dashboard
 Shows the TUF-branded home screen with wallet card, balance summary, smart insights card, and recent transactions.
 
-![Home Dashboard](./screenshots/home-dashboard.jpeg)
+<img src="./screenshots/home-dashboard.jpeg" alt="Home Dashboard" width="280" />
 
 ### 2. Auth Flow
 Shows the local sign in and sign up experience before entering the app.
 
-![Sign In](./screenshots/sign-in.jpeg)
-![Sign Up](./screenshots/sign-up.jpeg)
+<img src="./screenshots/sign-in.jpeg" alt="Sign In" width="230" />
+<img src="./screenshots/sign-up.jpeg" alt="Sign Up" width="230" />
 
 ### 3. Balances & Analytics
 Shows the custom score gauge, donut chart, spending pace bars, and cash flow trend chart.
 
-![Balances & Analytics](./screenshots/balances-analytics.jpeg)
+<img src="./screenshots/balances-analytics.jpeg" alt="Balances & Analytics" width="280" />
 
 ### 4. Add Transaction Flow
 Shows the add income/expense form with amount, date, category, note, validation, and save action.
 
-![Add Transaction Flow](./screenshots/add-transaction.jpeg)
+<img src="./screenshots/add-transaction.jpeg" alt="Add Transaction Flow" width="280" />
 
 ### 5. Search & Filter Transactions
 Shows transaction search and filter controls for quickly finding income and expense entries.
 
-![Search & Filter Transactions](./screenshots/search-filter.jpeg)
+<img src="./screenshots/search-filter.jpeg" alt="Search & Filter Transactions" width="280" />
 
 ### 6. Profile & Theme Settings
 Shows profile preview/edit flow along with dark/light/system theme switching and sign out.
 
-![Profile & Theme Settings](./screenshots/profile-theme.jpeg)
+<img src="./screenshots/profile-theme.jpeg" alt="Profile & Theme Settings" width="280" />
 
 ### 7. Smart Insights Card
 Shows the insight card that reacts to spending behavior and recent activity.
 
-![Smart Insights Card](./screenshots/smart-insights.jpeg)
+<img src="./screenshots/smart-insights.jpeg" alt="Smart Insights Card" width="280" />
 
 ### 8. Category Breakdown
 Shows the category donut chart and expense distribution view.
 
-![Category Breakdown](./screenshots/category-breakdown.jpeg)
+<img src="./screenshots/category-breakdown.jpeg" alt="Category Breakdown" width="280" />
 
 ### 9. Cash Flow Trend
 Shows the trend chart for income versus expense movement over time.
 
-![Cash Flow Trend](./screenshots/cash-flow-trend.jpeg)
+<img src="./screenshots/cash-flow-trend.jpeg" alt="Cash Flow Trend" width="280" />
 
 ### 10. Spending Pace Chart
 Shows the bar chart for weekly, monthly, or yearly spending pace.
 
-![Spending Pace Chart](./screenshots/spending-pace-chart.jpeg)
+<img src="./screenshots/spending-pace-chart.jpeg" alt="Spending Pace Chart" width="280" />
 
 ## Testing
 
