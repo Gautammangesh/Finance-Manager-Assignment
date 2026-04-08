@@ -174,25 +174,10 @@ Shows the local sign in and sign up experience before entering the app.
 ![Sign In](./screenshots/sign-in.png)
 ![Sign Up](./screenshots/sign-up.png)
 
-### 3. Add Transaction Flow
-Shows the add income/expense form with amount, date, category, note, validation, and save action.
-
-![Add Transaction Flow](./screenshots/add-transaction.png)
-
-### 4. Balances & Analytics
+### 3. Balances & Analytics
 Shows the custom score gauge, donut chart, spending pace bars, and cash flow trend chart.
 
 ![Balances & Analytics](./screenshots/balances-analytics.png)
-
-### 5. Search & Filter Transactions
-Shows transaction search and filter controls for quickly finding income and expense entries.
-
-![Search & Filter Transactions](./screenshots/search-filter.png)
-
-### 6. Profile & Theme Settings
-Shows profile preview/edit flow along with dark/light/system theme switching and sign out.
-
-![Profile & Theme Settings](./screenshots/profile-theme.png)
 
 ## Testing
 
@@ -263,7 +248,7 @@ Use that generated URL in the submission form's APK Link field.
 
 - The app uses local persistence only and does not require a backend.
 - Auth in this project is local/demo-oriented and designed for assignment presentation.
-- Screenshot links require the `screenshots/` folder assets to be present in the repo.
+- The current repo includes the available screenshots inside the `screenshots/` folder.
 
 ## Author
 
