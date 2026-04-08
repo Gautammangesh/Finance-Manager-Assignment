@@ -45,9 +45,9 @@ const INITIAL_TRANSACTIONS = [
 ];
 
 const DEFAULT_ACCOUNT = {
-  name: 'Alex Yu',
-  email: 'alex@tuf.com',
-  password: 'tuf12345',
+  name: 'Mangesh Gautam',
+  email: 'gautammanoj767@gmail.com',
+  password: 'mangesh12345',
 };
 
 const DEFAULT_USER = {

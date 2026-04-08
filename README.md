@@ -147,8 +147,8 @@ npx expo start --clear --tunnel
 You can log in with the local demo account:
 
 ```text
-Email: alex@tuf.com
-Password: tuf12345
+Email: gautammanoj767@gmail.com
+Password: mangesh12345
 ```
 
 Or create your own account using the Sign Up flow.
@@ -166,18 +166,53 @@ npx expo-doctor
 ### 1. Home Dashboard
 Shows the TUF-branded home screen with wallet card, balance summary, smart insights card, and recent transactions.
 
-![Home Dashboard](./screenshots/home-dashboard.png)
+![Home Dashboard](./screenshots/home-dashboard.jpeg)
 
 ### 2. Auth Flow
 Shows the local sign in and sign up experience before entering the app.
 
-![Sign In](./screenshots/sign-in.png)
-![Sign Up](./screenshots/sign-up.png)
+![Sign In](./screenshots/sign-in.jpeg)
+![Sign Up](./screenshots/sign-up.jpeg)
 
 ### 3. Balances & Analytics
 Shows the custom score gauge, donut chart, spending pace bars, and cash flow trend chart.
 
-![Balances & Analytics](./screenshots/balances-analytics.png)
+![Balances & Analytics](./screenshots/balances-analytics.jpeg)
+
+### 4. Add Transaction Flow
+Shows the add income/expense form with amount, date, category, note, validation, and save action.
+
+![Add Transaction Flow](./screenshots/add-transaction.jpeg)
+
+### 5. Search & Filter Transactions
+Shows transaction search and filter controls for quickly finding income and expense entries.
+
+![Search & Filter Transactions](./screenshots/search-filter.jpeg)
+
+### 6. Profile & Theme Settings
+Shows profile preview/edit flow along with dark/light/system theme switching and sign out.
+
+![Profile & Theme Settings](./screenshots/profile-theme.jpeg)
+
+### 7. Smart Insights Card
+Shows the insight card that reacts to spending behavior and recent activity.
+
+![Smart Insights Card](./screenshots/smart-insights.jpeg)
+
+### 8. Category Breakdown
+Shows the category donut chart and expense distribution view.
+
+![Category Breakdown](./screenshots/category-breakdown.jpeg)
+
+### 9. Cash Flow Trend
+Shows the trend chart for income versus expense movement over time.
+
+![Cash Flow Trend](./screenshots/cash-flow-trend.jpeg)
+
+### 10. Spending Pace Chart
+Shows the bar chart for weekly, monthly, or yearly spending pace.
+
+![Spending Pace Chart](./screenshots/spending-pace-chart.jpeg)
 
 ## Testing
 
@@ -249,6 +284,7 @@ Use that generated URL in the submission form's APK Link field.
 - The app uses local persistence only and does not require a backend.
 - Auth in this project is local/demo-oriented and designed for assignment presentation.
 - The current repo includes the available screenshots inside the `screenshots/` folder.
+- You can later add more screenshots by dropping files into the `screenshots/` folder using the names referenced above.
 
 ## Author
 

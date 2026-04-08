@@ -80,14 +80,14 @@ it('restores the last deleted transaction via undo', () => {
 
 it('updates the user profile', () => {
   useFinanceStore.getState().updateProfile({
-    name: 'Alex Carter',
-    email: 'alex.carter@tuf.com',
+    name: 'Mangesh Gautam',
+    email: 'gautammanoj767@gmail.com',
   });
 
   const state = useFinanceStore.getState();
 
-  expect(state.user.name).toBe('Alex Carter');
-  expect(state.user.email).toBe('alex.carter@tuf.com');
+  expect(state.user.name).toBe('Mangesh Gautam');
+  expect(state.user.email).toBe('gautammanoj767@gmail.com');
 });
 
 it('updates the theme mode', () => {

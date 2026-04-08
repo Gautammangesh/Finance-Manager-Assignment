@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Redirect, useRouter } from 'expo-router';
+import { Eye, EyeOff } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -9,10 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Redirect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Eye, EyeOff } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
@@ -31,8 +31,8 @@ export default function AuthScreen() {
   const { isAuthenticated, signIn, signUp } = useFinanceStore();
   const [modeIndex, setModeIndex] = useState(0);
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('alex@tuf.com');
-  const [password, setPassword] = useState('tuf12345');
+  const [email, setEmail] = useState('gautammanoj767@gmail.com');
+  const [password, setPassword] = useState('mangesh12345');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -226,7 +226,7 @@ export default function AuthScreen() {
               <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
             ) : (
               <Text style={[styles.demoHint, { color: theme.textMuted }]}>
-                Demo sign in: `alex@tuf.com` / `tuf12345`
+                Demo sign in: `gautammanoj767@gmail.com` / `mangesh12345`
               </Text>
             )}
 
