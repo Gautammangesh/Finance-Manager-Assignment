@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RefreshCcw, Search, Bell, LogOut } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,6 +14,7 @@ import { useFinanceStore } from '@/src/store/useFinanceStore';
 import { Colors, Gradients } from '@/src/theme';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const { user, transactions, updateProfile, resetDemoData, themeMode, setThemeMode, signOut } = useFinanceStore();
@@ -72,6 +74,15 @@ export default function ProfileScreen() {
         { text: 'Reset', style: 'destructive', onPress: () => resetDemoData() },
       ]
     );
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    setViewMode(0);
+    setPassword('');
+    setConfirmPassword('');
+    setError('');
+    router.replace('/auth');
   };
 
   const themeIndex = themeMode === 'dark' ? 1 : themeMode === 'light' ? 2 : 0;
@@ -165,7 +176,7 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 style={[styles.signOutButton, { borderColor: theme.outline, backgroundColor: theme.backgroundElevated }]}
-                onPress={signOut}
+                onPress={handleSignOut}
               >
                 <LogOut color={theme.text} size={16} />
                 <Text style={[styles.signOutText, { color: theme.text }]}>Sign Out</Text>
