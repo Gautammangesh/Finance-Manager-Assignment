@@ -218,7 +218,16 @@ export const useFinanceStore = create(
     {
       name: 'finance-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        themeMode: state.themeMode,
+        pendingUndoTransaction: state.pendingUndoTransaction,
+        authAccount: state.authAccount,
+        user: state.user,
+        transactions: state.transactions,
+        categories: state.categories,
+      }),
       onRehydrateStorage: () => (state) => {
+        state?.signOut();
         state?.setHasHydrated(true);
       },
     }
