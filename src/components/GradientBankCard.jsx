@@ -16,7 +16,7 @@ export const GradientBankCard = ({
     <View style={styles.shell}>
       <LinearGradient colors={Gradients.cardMint} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
         <View style={styles.header}>
-          <Text style={styles.bankName}>ADRBank</Text>
+          <Text style={styles.bankName}>TUF Wallet</Text>
           <View style={styles.iconBadge}>
             <RefreshCcw color="#FFFFFF" size={18} />
           </View>

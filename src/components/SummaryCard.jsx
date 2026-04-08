@@ -5,7 +5,7 @@ import { ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
 import { useColorScheme } from '@/components/useColorScheme';
 import { Colors } from '@/src/theme';
 
-export const SummaryCard = ({ type, amount, caption }) => {
+export const SummaryCard = ({ type, amount, caption, label }) => {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const isIncome = type === 'income';
@@ -29,7 +29,7 @@ export const SummaryCard = ({ type, amount, caption }) => {
         {isIncome ? <ArrowDownLeft color={theme.success} size={18} /> : <ArrowUpRight color={theme.danger} size={18} />}
       </View>
       <Text style={[styles.label, { color: theme.textSecondary }]}>
-        {isIncome ? 'Income' : 'Expense'}
+        {label ?? (isIncome ? 'Income' : 'Expense')}
       </Text>
       <Text style={[styles.amount, { color: theme.text }]} numberOfLines={1} adjustsFontSizeToFit>${amount.toLocaleString()}</Text>
       <Text style={[styles.caption, { color: theme.textMuted }]}>

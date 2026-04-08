@@ -1,9 +1,16 @@
 import { useFinanceStore } from './useFinanceStore';
 
 const baseState = {
+  hasHydrated: true,
+  isAuthenticated: true,
+  authAccount: {
+    name: 'Mangesh Gautam',
+    email: 'gautammanoj767@gmail.com',
+    password: 'mangesh12345',
+  },
   user: {
-    name: 'Alex Yu',
-    email: 'alex@payu.com',
+    name: 'Mangesh Gautam',
+    email: 'gautammanoj767@gmail.com',
     balance: 20000,
   },
   transactions: [
@@ -74,13 +81,13 @@ it('restores the last deleted transaction via undo', () => {
 it('updates the user profile', () => {
   useFinanceStore.getState().updateProfile({
     name: 'Alex Carter',
-    email: 'alex.carter@payu.com',
+    email: 'alex.carter@tuf.com',
   });
 
   const state = useFinanceStore.getState();
 
   expect(state.user.name).toBe('Alex Carter');
-  expect(state.user.email).toBe('alex.carter@payu.com');
+  expect(state.user.email).toBe('alex.carter@tuf.com');
 });
 
 it('updates the theme mode', () => {
@@ -100,4 +107,14 @@ it('adds a custom category and returns its id', () => {
 
   expect(typeof newId).toBe('string');
   expect(state.categories.some((category) => category.id === newId && category.name === 'Bills')).toBe(true);
+});
+
+it('signs in with the stored credentials', () => {
+  const result = useFinanceStore.getState().signIn({
+    email: 'gautammanoj767@gmail.com',
+    password: 'mangesh12345',
+  });
+
+  expect(result.success).toBe(true);
+  expect(useFinanceStore.getState().isAuthenticated).toBe(true);
 });

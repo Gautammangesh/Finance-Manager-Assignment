@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { RefreshCcw, Search, Bell } from 'lucide-react-native';
+import { RefreshCcw, Search, Bell, LogOut } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColorScheme } from '@/components/useColorScheme';
@@ -15,7 +15,7 @@ import { Colors, Gradients } from '@/src/theme';
 export default function ProfileScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
-  const { user, transactions, updateProfile, resetDemoData, themeMode, setThemeMode } = useFinanceStore();
+  const { user, transactions, updateProfile, resetDemoData, themeMode, setThemeMode, signOut } = useFinanceStore();
   const [viewMode, setViewMode] = useState(0);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
@@ -162,6 +162,14 @@ export default function ProfileScreen() {
                 Managed password and clear historical logs for the application.
               </Text>
               <StyledButton title="Reset Demo Data" variant="outline" onPress={handleResetDemo} />
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.signOutButton, { borderColor: theme.outline, backgroundColor: theme.backgroundElevated }]}
+                onPress={signOut}
+              >
+                <LogOut color={theme.text} size={16} />
+                <Text style={[styles.signOutText, { color: theme.text }]}>Sign Out</Text>
+              </TouchableOpacity>
             </View>
           </>
         ) : (
@@ -359,5 +367,19 @@ const styles = StyleSheet.create({
   },
   editSection: {
     paddingTop: 4,
+  },
+  signOutButton: {
+    marginTop: 12,
+    minHeight: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signOutText: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginLeft: 8,
   },
 });

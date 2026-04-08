@@ -233,7 +233,7 @@ export default function HomeScreen() {
         </AnimatedEntrance>
 
         <AnimatedEntrance delay={180} style={styles.summaryRow}>
-          <SummaryCard type="income" amount={incomeTotal} caption="Incoming this view" />
+          <SummaryCard type="income" amount={user.balance} label="Balance" caption="Available now" />
           <SummaryCard type="expense" amount={expenseTotal} caption="Spent this view" />
         </AnimatedEntrance>
 

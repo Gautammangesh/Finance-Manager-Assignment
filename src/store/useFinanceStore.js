@@ -44,18 +44,86 @@ const INITIAL_TRANSACTIONS = [
   },
 ];
 
+const DEFAULT_ACCOUNT = {
+  name: 'Alex Yu',
+  email: 'alex@tuf.com',
+  password: 'tuf12345',
+};
+
+const DEFAULT_USER = {
+  name: DEFAULT_ACCOUNT.name,
+  email: DEFAULT_ACCOUNT.email,
+  balance: 20000,
+};
+
 export const useFinanceStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
+      hasHydrated: false,
+      isAuthenticated: false,
       themeMode: 'system',
       pendingUndoTransaction: null,
-      user: {
-        name: 'Alex Yu',
-        email: 'alex@payu.com',
-        balance: 20000,
-      },
+      authAccount: DEFAULT_ACCOUNT,
+      user: DEFAULT_USER,
       transactions: INITIAL_TRANSACTIONS,
       categories: DEFAULT_CATEGORIES,
+      setHasHydrated: (hasHydrated) =>
+        set(() => ({
+          hasHydrated,
+        })),
+      signIn: ({ email, password }) => {
+        const account = get().authAccount;
+        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedPassword = password.trim();
+
+        if (!normalizedEmail || !normalizedPassword) {
+          return { success: false, message: 'Email and password are required' };
+        }
+
+        if (normalizedEmail !== account.email.toLowerCase() || normalizedPassword !== account.password) {
+          return { success: false, message: 'Incorrect email or password' };
+        }
+
+        set((state) => ({
+          isAuthenticated: true,
+          user: {
+            ...state.user,
+            name: account.name,
+            email: account.email,
+          },
+        }));
+
+        return { success: true };
+      },
+      signUp: ({ name, email, password }) => {
+        const trimmedName = name.trim();
+        const trimmedEmail = email.trim().toLowerCase();
+        const trimmedPassword = password.trim();
+
+        if (!trimmedName || !trimmedEmail || !trimmedPassword) {
+          return { success: false, message: 'All fields are required' };
+        }
+
+        set((state) => ({
+          authAccount: {
+            name: trimmedName,
+            email: trimmedEmail,
+            password: trimmedPassword,
+          },
+          isAuthenticated: true,
+          user: {
+            ...state.user,
+            name: trimmedName,
+            email: trimmedEmail,
+          },
+        }));
+
+        return { success: true };
+      },
+      signOut: () =>
+        set(() => ({
+          isAuthenticated: false,
+        })),
       addTransaction: (transaction) =>
         set((state) => ({
           transactions: [
@@ -116,6 +184,11 @@ export const useFinanceStore = create(
       updateProfile: (profile) =>
         set((state) => ({
           user: { ...state.user, ...profile },
+          authAccount: {
+            ...state.authAccount,
+            ...(profile.name ? { name: profile.name } : null),
+            ...(profile.email ? { email: profile.email.trim().toLowerCase() } : null),
+          },
         })),
       setThemeMode: (themeMode) =>
         set(() => ({
@@ -133,11 +206,9 @@ export const useFinanceStore = create(
       },
       resetDemoData: () =>
         set(() => ({
-          user: {
-            name: 'Alex Yu',
-            email: 'alex@payu.com',
-            balance: 20000,
-          },
+          isAuthenticated: false,
+          authAccount: DEFAULT_ACCOUNT,
+          user: DEFAULT_USER,
           themeMode: 'system',
           pendingUndoTransaction: null,
           transactions: INITIAL_TRANSACTIONS,
@@ -147,6 +218,9 @@ export const useFinanceStore = create(
     {
       name: 'finance-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

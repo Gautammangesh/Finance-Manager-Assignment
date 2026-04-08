@@ -6,14 +6,12 @@ import { useFonts } from 'expo-font';
 import { Stack, ErrorBoundary } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from '@/components/useColorScheme';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
+import { useFinanceStore } from '@/src/store/useFinanceStore';
+import { Colors } from '@/src/theme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -44,15 +42,41 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'dark'];
+  const { hasHydrated, isAuthenticated } = useFinanceStore();
+
+  if (!hasHydrated) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.background,
+          }}
+        >
+          <ActivityIndicator color={theme.primary} />
+        </View>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="add-transaction" options={{ presentation: 'modal', title: 'Add Transaction' }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Info' }} />
-        </Stack>
+        {isAuthenticated ? (
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="add-transaction" options={{ presentation: 'modal', title: 'Add Transaction', headerShown: true }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Info', headerShown: true }} />
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+          </Stack>
+        ) : (
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+          </Stack>
+        )}
       </ThemeProvider>
     </GestureHandlerRootView>
   );

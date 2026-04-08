@@ -1,66 +1,67 @@
 # Finance Manager / Expense Tracker
 
-> A polished fintech-style mobile app for tracking income, expenses, analytics, and smarter money habits.
+> A polished fintech-style mobile app for tracking income, expenses, balances, and smarter money habits.
 
-A modern fintech-style mobile app built for the Finance Manager App Assignment using Expo and React Native. The app helps users track income and expenses, monitor category-based spending, view financial summaries, and manage everything locally with a polished dark/light experience.
+This project was built for the Finance Manager App Assignment using Expo and React Native. It helps users add and manage transactions locally, review balance analytics, explore category-level spending, and use a clean multi-screen finance workflow with dark/light theme support.
 
 ## Overview
 
-### Why this project?
+### Highlights
 
-This project focuses on:
-- clean mobile-first UI/UX
-- scalable component structure
-- local-first finance tracking
-- thoughtful product polish beyond the minimum assignment requirements
-
-The app includes the assignment core flows along with a few standout additions like smart insights, transaction search/filter, and undo delete.
+- mobile-first fintech UI with polished cards, gradients, and animations
+- local-first finance tracking using AsyncStorage
+- sign in / sign up flow for a cleaner app entry experience
+- balance analytics screen with score gauge, donut chart, trend line, and custom bar chart
+- searchable transactions, smart insights, undo delete, and profile editing
 
 ## Features
 
 ### Core Features
-- 💸 Add income and expense transactions
-- 📝 Transaction fields: amount, category, date, and note
-- ✅ Form validation for transaction creation
-- 🏷️ Category-based tracking with icons and color distinction
-- 📆 Weekly, monthly, and yearly finance views
-- 📊 Financial summary with balance, income, and expense visibility
-- 💾 Local persistence using AsyncStorage
-- 🧭 Bottom tab navigation with 3 primary sections
-- 🌗 Dark, light, and system theme support
-- 🎨 Gradient-based fintech-style UI
-- ⌨️ Keyboard-aware forms for smoother mobile UX
+
+- Add income and expense transactions
+- Transaction fields: amount, category, date, and note
+- Form validation for transaction creation
+- Category-based tracking with visual distinction
+- Weekly, monthly, and yearly finance views
+- Financial summary with available balance and expense visibility
+- Local persistence using AsyncStorage
+- Bottom tab navigation with 3 primary sections
+- Dark, light, and system theme support
+- Keyboard-aware forms for smoother mobile UX
 
 ### Standout Features
-- ✨ Smart insights card on the Home screen
-- 🔎 Search and filter on the transactions screen
-- ↩️ Undo delete flow for removed transactions
-- 🍩 Spending by category donut chart
-- 📈 Cash flow trend line chart
-- 🎬 Animated entrances and micro-interactions
-- 👻 Better empty states and polished visual hierarchy
+
+- Local sign in / sign up onboarding flow
+- Smart insights card on the Home screen
+- Search and filter on the balances/transactions screen
+- Undo delete flow for removed transactions
+- Spending by category donut chart
+- Cash flow trend line chart
+- Custom balance score gauge
+- Animated entrances and polished empty states
 
 ## Tech Stack
 
-- ⚡ Expo
-- 📱 React Native
-- 🧭 Expo Router
-- 🗂️ Zustand
-- 💾 AsyncStorage
-- 📊 react-native-gifted-charts
-- 👆 react-native-gesture-handler
-- 🌈 expo-linear-gradient
-- 🧩 lucide-react-native
+- Expo
+- React Native
+- Expo Router
+- Zustand
+- AsyncStorage
+- react-native-gifted-charts
+- react-native-svg
+- expo-linear-gradient
+- lucide-react-native
 
 ## Project Structure
 
 ```text
 app/
+  auth.jsx
+  add-transaction.jsx
   (tabs)/
     index.jsx
     transactions.jsx
     profile.jsx
-  add-transaction.jsx
 src/
   components/
   store/
@@ -89,7 +90,7 @@ npm install
 npx expo start
 ```
 
-If you want a cleaner mobile connection flow, you can also use:
+For a cleaner mobile connection flow:
 
 ```bash
 npx expo start --clear --tunnel
@@ -97,10 +98,21 @@ npx expo start --clear --tunnel
 
 ### 4. Run on device
 
-- 📲 Install Expo Go on your Android or iOS device
-- 🔍 Scan the QR code shown in the terminal
+- Install Expo Go on your Android or iOS device
+- Scan the QR code shown in the terminal
 
-### 5. Run checks
+### 5. Demo login
+
+Use the local demo credentials on the auth screen:
+
+```text
+Email: alex@tuf.com
+Password: tuf12345
+```
+
+Or create a new local account through the Sign Up flow.
+
+### 6. Run checks
 
 ```bash
 npx tsc --noEmit
@@ -111,71 +123,78 @@ npx expo-doctor
 ## Screenshots
 
 ### 1. Home Dashboard
-Shows the main finance overview with the balance card, summary cards, smart insights card, and recent transactions.
+
+Shows the TUF-branded home screen with wallet card, balance summary, smart insights, and recent transactions.
 
 ![Home Dashboard](./screenshots/home-dashboard.png)
 
-### 2. Add Transaction Flow
+### 2. Auth Flow
+
+Shows the local sign in / sign up experience before entering the app.
+
+![Sign In](./screenshots/sign-in.png)
+![Sign Up](./screenshots/sign-up.png)
+
+### 3. Add Transaction Flow
+
 Shows the add income/expense form with amount, date, category, note, validation, and save action.
 
 ![Add Transaction Flow](./screenshots/add-transaction.png)
 
-### 3. Category Tracking
-Shows predefined categories, custom category creation, and the visual distinction using icons and colors.
-
-![Category Tracking](./screenshots/category-tracking.png)
-
 ### 4. Balances & Analytics
-Shows weekly/monthly/yearly views with spending analytics, category breakdown, and the cash flow trend chart.
+
+Shows the custom balance score gauge, category donut chart, stacked spending bars, and cash flow trend line.
 
 ![Balances & Analytics](./screenshots/balances-analytics.png)
 
 ### 5. Search & Filter Transactions
+
 Shows transaction search and filter controls for quickly finding income and expense entries.
 
 ![Search & Filter Transactions](./screenshots/search-filter.png)
 
 ### 6. Profile & Theme Settings
-Shows profile preview/edit flow along with dark/light/system theme switching.
+
+Shows profile preview/edit flow along with dark/light/system theme switching and sign out.
 
 ![Profile & Theme Settings](./screenshots/profile-theme.png)
 
 ## Testing
 
 The project has been validated with:
-- 🧪 TypeScript check via `npx tsc --noEmit`
-- ✅ Jest tests via `npm test -- --runInBand`
-- 🩺 Expo environment validation via `npx expo-doctor`
+
+- TypeScript check via `npx tsc --noEmit`
+- Jest tests via `npm test -- --runInBand`
+- Expo environment validation via `npx expo-doctor`
 
 Current automated coverage includes:
+
 - adding transactions
 - deleting transactions
 - undo-related store restoration
 - profile updates
 - theme mode updates
 - custom category creation
+- local sign-in validation
 
 ## Assignment Requirements Mapping
 
 ### Mandatory Requirements
-- 🎨 Gradient-based UI: implemented
-- 🌗 Dark / Light mode toggle: implemented
-- 🧭 Bottom Tab Navigation: implemented
-- 🎬 Animations: implemented
-- ⌨️ Keyboard handling: implemented
-- 💾 Local storage: implemented
+
+- Gradient-based UI: implemented
+- Dark / Light mode toggle: implemented
+- Bottom Tab Navigation: implemented
+- Animations: implemented
+- Keyboard handling: implemented
+- Local storage: implemented
 
 ### Feature Requirements
-- 💸 Add income / expense: implemented
-- 📝 Fields: amount, category, date, note: implemented
-- ✅ Form validation: implemented
-- 🏷️ Category-based tracking: implemented
-- 📊 Monthly summary: implemented
 
-## Notes
-
-- Pixel-perfect design was not the goal; the UI was built to stay aligned with the assignment while still showing creativity.
-- The app uses local persistence only and does not require a backend.
+- Add income / expense: implemented
+- Fields: amount, category, date, note: implemented
+- Form validation: implemented
+- Category-based tracking: implemented
+- Monthly summary: implemented
 
 ## Repository
 
@@ -183,6 +202,32 @@ GitHub Repo:
 
 `https://github.com/Gautammangesh/Finance-Manager-Assignment`
 
+## APK Build
+
+This Expo project is configured for EAS APK builds.
+
+1. Install EAS CLI:
+
+```bash
+npm install -g eas-cli
+```
+
+2. Log in to your Expo account:
+
+```bash
+eas login
+```
+
+3. Build a shareable Android APK:
+
+```bash
+eas build -p android --profile preview
+```
+
+4. After the build finishes, Expo will provide a public download URL.
+
+Use that generated URL in the submission form's APK Link field.
+
 ## Author
 
-Built by Gautam for the Finance Manager App Assignment.
+Built by Mangesh for the Finance Manager App Assignment.
